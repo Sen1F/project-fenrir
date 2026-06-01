@@ -1,0 +1,20 @@
+#!/bin/sh
+# Enforce conventional commit format:
+# <type>(<scope>): <subject>
+# Types: feat, fix, docs, chore, refactor, test, release
+
+msg=$(cat "$1")
+pattern="^(feat|fix|docs|chore|refactor|test|release)(\(.+\))?: .{1,72}"
+
+if ! echo "$msg" | grep -qE "$pattern"; then
+  echo "✗ Commit message does not follow conventional commits."
+  echo ""
+  echo "  Format:  <type>(<scope>): <subject>"
+  echo "  Types:   feat, fix, docs, chore, refactor, test, release"
+  echo "  Example: docs(lore): add Fenrir origin myth"
+  echo ""
+  echo "  Got: $msg"
+  exit 1
+fi
+
+exit 0

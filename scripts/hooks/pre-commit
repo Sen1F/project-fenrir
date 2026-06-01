@@ -1,0 +1,27 @@
+#!/bin/sh
+# Enforce branch naming and run markdownlint on staged .md files.
+
+# ── Branch naming ─────────────────────────────────────────────────────────────
+current=$(git symbolic-ref --short HEAD 2>/dev/null)
+allowed="^(main|develop|feature/.+|fix/.+|chore/.+|release/.+)$"
+
+if ! echo "$current" | grep -qE "$allowed"; then
+  echo "✗ Branch name '$current' is not allowed."
+  echo "  Use: feature/<name>, fix/<name>, chore/<name>, or release/<name>"
+  exit 1
+fi
+
+# ── Markdownlint on staged .md files ─────────────────────────────────────────
+staged_md=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$')
+
+if [ -n "$staged_md" ]; then
+  if command -v markdownlint >/dev/null 2>&1; then
+    echo "$staged_md" | xargs markdownlint
+    if [ $? -ne 0 ]; then
+      echo "✗ Markdownlint failed. Fix the issues above before committing."
+      exit 1
+    fi
+  fi
+fi
+
+exit 0

@@ -20,19 +20,24 @@ Project Fenrir is a semi-open-world action RPG where players are randomly assign
 ## 2. Design Pillars
 
 ### Pillar 1 — Skill > Level
+
 Player skill is the primary determinant of combat outcomes.
 
 **Leveling unlocks:**
+
 - New abilities
 - New passives
 - New build options
 
 **Leveling does NOT provide:**
+
 - Massive stat increases
 - Automatic combat superiority
 
 ### Pillar 2 — Hidden Evolution
+
 Players never directly choose evolutions. The game observes:
+
 - Combat behavior
 - Exploration habits
 - Moral decisions
@@ -42,7 +47,9 @@ Players never directly choose evolutions. The game observes:
 Evolution occurs based on hidden conditions — never manual selection.
 
 ### Pillar 3 — Discovery Over Grinding
+
 The most exciting moments should be:
+
 - Discovering a hidden area
 - Encountering a rare creature
 - Triggering an unknown evolution
@@ -51,7 +58,9 @@ The most exciting moments should be:
 Not simply reaching a level cap.
 
 ### Pillar 4 — PvP As A Rite Of Ascension
+
 PvP is not the primary progression system. It becomes meaningful late-game for:
+
 - Certain evolutions
 - Legendary trials
 - Prestige achievements
@@ -63,7 +72,7 @@ Players primarily progress through PvE.
 ## 3. Genre
 
 | Category | Value |
-|---|---|
+| --- | --- |
 | Primary | Action RPG |
 | Secondary | Creature Hunting, Exploration, Character Evolution |
 | Inspirations | Infinity Blade, Elden Ring, Monster Hunter, Shadow of Mordor |
@@ -77,7 +86,7 @@ Players primarily progress through PvE.
 ### Initial Regions
 
 | Region | Alignment | Creatures |
-|---|---|---|
+| --- | --- | --- |
 | Ember Forest | Fire | Ash Wolves, Flame Sprites, Ember Stags |
 | Tidal Marsh | Water | Mire Serpents, Tide Crawlers, Water Wraiths |
 | Stone Expanse | Earth | Stonebacks, Crystal Crawlers, Earth Titans |
@@ -88,22 +97,30 @@ Players primarily progress through PvE.
 ## 5. Element System
 
 ### Common Elements
+
 Fire · Water · Earth · Air  
+
 - Most players receive these
 - Highest growth potential
 
 ### Rare Elements
+
 Lightning · Metal · Ice · Nature  
+
 - Stronger starting kits
 - Reduced evolutionary flexibility
 
 ### Very Rare Elements
+
 Light · Darkness · Shadow  
+
 - Powerful starting abilities
 - Difficult evolution requirements
 
 ### Supreme Elements
+
 Space · Time · Life · Death  
+
 - Extremely powerful beginnings
 - Few evolution paths
 - Highest mastery requirements
@@ -113,16 +130,20 @@ Space · Time · Life · Death
 ## 6. Progression
 
 ### Level
+
 Represents experience. Unlocks active/passive abilities and build slots. Does NOT heavily affect combat power.
 
 ### Evolution
+
 Represents identity. Triggered by:
+
 - Hidden behavioral metrics
 - World choices
 - Creature encounters
 - Major accomplishments
 
 ### Ascension
+
 Late-game. Requires mastery of self, world, and other players. May include PvP trials.
 
 ---
@@ -130,9 +151,11 @@ Late-game. Requires mastery of self, world, and other players. May include PvP t
 ## 7. Combat
 
 ### Philosophy
+
 Combat should feel dangerous at every stage. A highly skilled low-level player can defeat a poorly played high-level character.
 
 ### Core Actions
+
 - Light Attack
 - Heavy Attack
 - Dodge
@@ -142,6 +165,7 @@ Combat should feel dangerous at every stage. A highly skilled low-level player c
 - Ultimate Ability
 
 ### Combat Success Factors
+
 1. Timing
 2. Positioning
 3. Resource Management
@@ -173,7 +197,7 @@ Evolution is determined by behavioral pattern, not manual selection.
 > *Build the smallest version that answers one question: Is the evolution system fun?*
 
 | Category | MVP Scope |
-|---|---|
+| --- | --- |
 | Elements | Fire, Water, Earth, Air |
 | Regions | Ember Forest only |
 | Evolutions | 1 per element |
@@ -191,7 +215,7 @@ Evolution is determined by behavioral pattern, not manual selection.
 ## 11. Awakening UX (Locked)
 
 | Decision | Choice |
-|---|---|
+| --- | --- |
 | Setting | Player's origin village |
 | Witnesses | Public ceremony — village and crowd watch |
 | Rarity reveal | Hinted through world reaction (NPCs react, no UI label) |
@@ -203,7 +227,7 @@ Evolution is determined by behavioral pattern, not manual selection.
 ## 12. Combat Design (Locked)
 
 | Decision | Choice |
-|---|---|
+| --- | --- |
 | Camera | Third-person over-the-shoulder |
 | Movement | Hybrid — virtual joystick + swipe abilities |
 | Ability system | Resource-gated (energy bar builds through combat actions) |
@@ -214,6 +238,7 @@ Evolution is determined by behavioral pattern, not manual selection.
 ## 13. World Travel (Locked)
 
 Open exploration. Regions are gated by:
+
 - **Boss barriers** — a powerful creature blocks passage (skill gate)
 - **Elemental barriers** — require a superior element type or a sufficiently evolved elemental ability (element gate)
 
@@ -234,7 +259,6 @@ See `LORE.md` for full world lore. Summary:
 
 **Canonical lines (locked, verbatim):**
 > *"The weak worship power. The powerful worship destiny. But destiny is merely the first chain. Break it."*
-
 > *"Fate determines your beginning. Choice determines your evolution. Mastery determines your destiny."*
 
 ---
@@ -242,7 +266,7 @@ See `LORE.md` for full world lore. Summary:
 ## 15. Social Layer (Locked)
 
 | Feature | Decision |
-|---|---|
+| --- | --- |
 | Element rarity showcase | Rare/Supreme elements visible to others in shared spaces |
 | Evolution showcase | New evolution forms are visible to other players when achieved |
 | Ghost data / leaderboards | Deferred — not in MVP |
@@ -253,7 +277,7 @@ See `LORE.md` for full world lore. Summary:
 ## 16. Save System (Locked)
 
 | Layer | Decision |
-|---|---|
+| --- | --- |
 | Primary | Local-first persistence (on-device) |
 | Backup | Optional iCloud sync |
 | Backend | Deferred — required for PvP and global discovery systems |

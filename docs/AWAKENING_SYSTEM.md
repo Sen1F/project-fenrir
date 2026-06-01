@@ -15,7 +15,7 @@ The Awakening is the moment a player receives their elemental affinity. It is th
 ## Core Rules (Locked)
 
 | Rule | Decision |
-|---|---|
+| --- | --- |
 | Binding | Character-bound |
 | Characters per account | 2 maximum |
 | Reroll | One per character lifetime |
@@ -29,7 +29,7 @@ The Awakening is the moment a player receives their elemental affinity. It is th
 
 Each account has exactly **2 character slots**. At account creation, a deterministic element seed is generated for each slot and stored permanently — it never changes, even if the character is deleted.
 
-```
+```text
 Account
 ├── Slot 1
 │   ├── slot_seed         (generated once at account creation, immutable)
@@ -42,6 +42,7 @@ Account
 ```
 
 ### Key invariant
+
 `slot_seed` and `slot_element` are **account-level data**, not character-level. A character deletion clears the character record but never touches the slot seed. Recreation always restores `slot_element` as `current_element`.
 
 ---
@@ -49,7 +50,7 @@ Account
 ## Rarity Distribution
 
 | Tier | Elements | Total Weight | Per Element | Approx. 1-in |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Common | Fire, Water, Earth, Air | 93.0% | 23.25% | 4 |
 | Rare | Lightning, Metal, Ice, Nature | 6.0% | 1.5% | 67 |
 | Very Rare | Light, Darkness, Shadow | 0.9% | 0.30% | 333 |
@@ -58,6 +59,7 @@ Account
 Supreme odds are intentionally equivalent to pulling a specific elite icon in a premium EAFC pack — rare enough to be a social event, common enough to exist in a meaningful playerbase.
 
 ### MVP note
+
 MVP only implements Common elements. Rare/Very Rare/Supreme weights are defined now so the seed system is built correctly from day one, but non-Common assignments fall back to Common during MVP. The full distribution activates in a future release.
 
 ---
@@ -65,6 +67,7 @@ MVP only implements Common elements. Rare/Very Rare/Supreme weights are defined 
 ## Seed Generation (Engineering Spec)
 
 ### Requirements
+
 - Deterministic: same seed always produces the same element
 - Tamper-resistant: cannot be manipulated via save editing or reinstall
 - Offline-capable for MVP: no server dependency at launch
@@ -90,6 +93,7 @@ func deriveElement(from seed: UUID, using distribution: ElementDistribution) -> 
 ```
 
 **Storage:** Slot seeds are written to the iOS Keychain (not UserDefaults, not iCloud) on first account creation. Keychain survives app deletion on device. This prevents:
+
 - Save-scumming via reinstall
 - Reroll farming via delete-reinstall loop
 
@@ -106,6 +110,7 @@ func deriveElement(from seed: UUID, using distribution: ElementDistribution) -> 
 5. The reroll is surfaced to the player as a narrative choice, not a UI button (see UX section)
 
 ### Why reroll doesn't reset on deletion
+
 If reroll reset on deletion, a player could delete → recreate → reroll → delete → recreate → reroll indefinitely, effectively getting unlimited rolls while always returning to their fate element. Tying the reroll to the slot permanently closes this loop.
 
 ---
@@ -125,6 +130,7 @@ The element reveal is a cinematic scripted sequence — not a UI screen.
    - Challenge → reroll dialog presented *once*, with cost made clear
 
 ### Reroll dialog (if triggered)
+>
 > *"To challenge fate is to surrender what you were given. There is no return."*
 > **[ Surrender it ]** / **[ Keep what I have ]**
 
@@ -143,7 +149,7 @@ Confirming reroll immediately discards current element and draws a new one. The 
 ## Relationship to Other Systems
 
 | System | Dependency |
-|---|---|
+| --- | --- |
 | Hidden Trait System | Traits are tracked per character, not per element — evolution paths are element-gated |
 | Evolution System | `current_element` determines which evolution tree is active |
 | Region Access | Starting region is suggested by element, but not locked |

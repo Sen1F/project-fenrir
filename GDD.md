@@ -292,15 +292,15 @@ Slot seeds (Awakening) stored in iOS Keychain. See `AWAKENING_SYSTEM.md`.
 - [x] **Camera** — Third-person over-the-shoulder
 - [x] **Combat movement** — Joystick + swipe hybrid
 - [x] **Ability system** — Resource-gated energy bar
-- [x] **Death system** — Currency loss + trait shift
+- [x] **Death system** — Currency loss + contextual trait shift (see `HIDDEN_TRAIT_SYSTEM.md`)
 - [x] **World travel** — Open exploration, boss/elemental barriers
 - [x] **Narrative** — See `LORE.md`
 - [x] **Save system** — Local-first + optional iCloud
-- [ ] **Trait visibility** — Any UI hints that traits exist, or fully silent?
-- [ ] **Slot 2 unlock** — Available at account creation or earned through play?
-- [ ] **Character creation scope** — How deep is appearance customisation for MVP?
-- [ ] **Fenrir Doctrine in MVP** — Does the player encounter any Doctrine members in Ember Forest?
-- [ ] **Death trait specifics** — Which traits shift on death, and in which direction?
+- [x] **Trait visibility** — Vague journal entry appears after first evolution only. No UI, no numbers.
+- [x] **Slot 2 unlock** — Available at account creation. Both slots open from day one.
+- [x] **Character creation scope** — Name + gender + face preset + body type. Element manifests in eyes/hair post-awakening.
+- [x] **Fenrir Doctrine in MVP** — Hidden shrine with cryptic lore fragment in Ember Forest. No NPC. Found through exploration.
+- [x] **Death trait specifics** — Contextual by death type. See `HIDDEN_TRAIT_SYSTEM.md` Combat Signals table.
 
 ---
 

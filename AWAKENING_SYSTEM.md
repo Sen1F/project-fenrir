@@ -140,7 +140,7 @@ Confirming reroll immediately discards current element and draws a new one. The 
 
 ## Open Questions (Not Blocking MVP)
 
-- [ ] Does Slot 2 unlock at a specific milestone, or is it available at account creation?
+- [x] **Slot 2 unlock** — Available at account creation. Both slots open immediately.
 - [ ] Are Supreme elements excluded from MVP reroll outcomes, or can a reroll land on one?
 - [ ] Should players ever see their `slot_element` (fate element) after a reroll, or is it hidden?
 

@@ -3,6 +3,7 @@
 > To be written in Phase 2 after Xcode project scaffold is complete.
 
 ## Planned Modules
+
 - App Shell
 - Game Loop
 - Scene / State Manager
@@ -15,4 +16,3 @@
 - Asset Manager
 - Analytics / Logging
 - Settings / Config
-

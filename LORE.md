@@ -64,6 +64,7 @@ He became the most powerful individual in recorded history.
 Through unknown trials, undocumented sacrifices, and battles that destroyed landscapes, Fenrir transformed his element. Not once. Repeatedly. Each evolution was stranger and more impossible than the last.
 
 Eventually, his power surpassed:
+
 - Kings of Light
 - Lords of Shadow  
 - Masters of Time
@@ -96,12 +97,14 @@ Two ideologies emerged in the aftermath of Fenrir's rise. The conflict between t
 The ruling powers. Existing kingdoms, noble houses, and Supreme-element dynasties.
 
 **They believe:**
+
 - Power is inherited
 - The hierarchy must be maintained
 - Supreme elements should rule; Common elements should serve
 - Fenrir was a dangerous revolutionary — or a myth deliberately fabricated to destabilise order
 
 **Their methods:**
+
 - Outlawed the teaching of Fenrir's methods
 - Destroyed or suppressed records of his evolutions
 - Maintain control over ancient shrines and elemental barriers
@@ -112,12 +115,14 @@ The ruling powers. Existing kingdoms, noble houses, and Supreme-element dynastie
 Followers of Fenrir. Underground, scattered, but persistent across centuries.
 
 **They believe:**
+
 - No element is complete at birth
 - Every element possesses hidden evolutionary paths
 - Any individual can transcend their Awakening
 - The greatest potential lies in the most underestimated
 
 **Their role in the world:**
+
 - Maintain hidden archives of Fenrir's fragments
 - Operate secret shrines that facilitate evolution
 - Watch for individuals walking the same path Fenrir once walked
@@ -134,6 +139,7 @@ His body was never found. His final evolution was never recorded. His teachings 
 And yet — something is changing.
 
 Across the world:
+
 - Unknown evolutions are appearing in individuals who should not be capable of them
 - Ancient shrines are awakening without any known trigger
 - Forgotten creatures are emerging from regions that were dormant for generations
@@ -182,6 +188,7 @@ The fragments players encounter:
 No source agrees. No source has the full picture.
 
 This mystery ties together every system in the game:
+
 - Why does the hidden trait system exist? Because Fenrir discovered that behaviour shapes power.
 - Why are the shrines awakening? Because Fenrir's path is being walked again.
 - Why do elements evolve beyond their original form? Because Fenrir proved they could.

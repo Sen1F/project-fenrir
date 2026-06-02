@@ -12,9 +12,10 @@ namespace Fenrir.Save
         private bool _isDirty;
         private readonly string _savePath;
 
-        public SaveManager()
+        public SaveManager(string overridePath = null)
         {
-            _savePath = Path.Combine(Application.persistentDataPath, Config.GameConfig.SaveFileName);
+            _savePath = overridePath
+                ?? Path.Combine(Application.persistentDataPath, Config.GameConfig.SaveFileName);
         }
 
         public async Task SaveAsync()

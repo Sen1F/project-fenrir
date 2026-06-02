@@ -71,8 +71,44 @@ namespace Fenrir.Core
                 );
                 ServiceLocator.Register<ITraitAccumulator>(accumulator);
 
-                // Subscribe accumulator to event bus
-                BehaviorEventBus.Subscribe<BehaviorEvent>(accumulator.Process);
+                // Subscribe accumulator to each concrete event type.
+                // (Bus is keyed by concrete type — base-type subscription doesn't propagate.)
+                BehaviorEventBus.Subscribe<DodgeUsedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CounterLandedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<PerfectBlockEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<BlockUsedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<HeavyAttackLandedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<LightAttackLandedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<AbilityUsedFullEnergyEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<AbilityUsedLowEnergyEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CombatCompletedNoDodgeEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<HitTakenNoDodgeEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DeathRecklessEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DeathSacrificeEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DeathOverwhelmedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DeathPatternFailEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DeathAmbushEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CreatureSparedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CreatureHuntedRepeatEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DialogueMercyEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DialoguePunishmentEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<NpcHelpedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<NpcIgnoredEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<LoreObjectReadEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<SecretAreaDiscoveredEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<OriginVillageReturnEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<AreaRevisitedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<QuestCompletedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<OffensiveUpgradePurchasedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<DefensiveUpgradePurchasedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<KnowledgeItemPurchasedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CurrencyHoardedEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<CurrencySpentImmediatelyEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<ExtendedDangerZoneEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<ExtendedSafeZoneEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<AllSecretsFoundEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<NightExplorationEvent>(accumulator.Process);
+                BehaviorEventBus.Subscribe<BossKilledEvent>(accumulator.Process);
             }
 
             Debug.Log($"[Bootstrap] Save loaded: {loaded}");

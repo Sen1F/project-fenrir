@@ -7,7 +7,8 @@ namespace Fenrir.Save
     [Serializable]
     public class SaveData
     {
-        public string           Version         = "0.1.0";
+        public const string     CurrentVersion  = "0.1.0";
+        public string           Version         = CurrentVersion;
         public DateTime         SavedAt         = DateTime.UtcNow;
         public CharacterData    Character       = new();
         public WorldState       World           = new();

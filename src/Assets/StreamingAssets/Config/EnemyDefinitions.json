@@ -1,0 +1,101 @@
+{
+  "Enemies": [
+    {
+      "Id":          "ash_wolf",
+      "DisplayName": "Ash Wolf",
+      "Element":     "Fire",
+      "Zone":        "TheThreshold",
+      "MaxHealth":   80,
+      "BaseAttack":  12,
+      "MoveSpeed":   4.5,
+      "AggroRange":  8.0,
+      "AttackRange": 1.8,
+      "Behaviours":  ["Patrol", "Chase", "Lunge"],
+      "TraitEvents": ["CreatureHuntedRepeatEvent"]
+    },
+    {
+      "Id":          "flame_sprite",
+      "DisplayName": "Flame Sprite",
+      "Element":     "Fire",
+      "Zone":        "TheAshwood",
+      "MaxHealth":   45,
+      "BaseAttack":  8,
+      "MoveSpeed":   6.0,
+      "AggroRange":  10.0,
+      "AttackRange": 5.0,
+      "Behaviours":  ["Patrol", "Chase", "RangedBurst"],
+      "TraitEvents": []
+    },
+    {
+      "Id":          "ember_stag",
+      "DisplayName": "Ember Stag",
+      "Element":     "Fire",
+      "Zone":        "TheEmberFields",
+      "MaxHealth":   140,
+      "BaseAttack":  18,
+      "MoveSpeed":   5.0,
+      "AggroRange":  6.0,
+      "AttackRange": 2.5,
+      "Behaviours":  ["Graze", "Chase", "Charge"],
+      "TraitEvents": ["CreatureSparedEvent"]
+    },
+    {
+      "Id":          "ash_revenant",
+      "DisplayName": "Ash Revenant",
+      "Element":     "Fire",
+      "Zone":        "CharRavine",
+      "MaxHealth":   200,
+      "BaseAttack":  22,
+      "MoveSpeed":   3.5,
+      "AggroRange":  7.0,
+      "AttackRange": 2.2,
+      "Behaviours":  ["Patrol", "Chase", "SlowCombo", "Enrage"],
+      "TraitEvents": []
+    },
+    {
+      "Id":          "inferno_wisp",
+      "DisplayName": "Inferno Wisp",
+      "Element":     "Fire",
+      "Zone":        "AnyNight",
+      "MaxHealth":   60,
+      "BaseAttack":  15,
+      "MoveSpeed":   7.0,
+      "AggroRange":  12.0,
+      "AttackRange": 4.0,
+      "Behaviours":  ["Float", "Chase", "SpiralBurst"],
+      "SpawnCondition": "Night",
+      "TraitEvents": ["NightExplorationEvent"]
+    }
+  ],
+  "Bosses": [
+    {
+      "Id":          "emberlord",
+      "DisplayName": "The Emberlord",
+      "Element":     "Fire",
+      "Zone":        "CharRavine",
+      "MaxHealth":   1200,
+      "BaseAttack":  35,
+      "MoveSpeed":   3.0,
+      "AggroRange":  20.0,
+      "AttackRange": 3.5,
+      "Phases": [
+        {
+          "PhaseIndex": 0,
+          "HealthThreshold": 1.0,
+          "Behaviours": ["Patrol", "HeavySlam", "BurningSwipe"]
+        },
+        {
+          "PhaseIndex": 1,
+          "HealthThreshold": 0.6,
+          "Behaviours": ["Patrol", "HeavySlam", "BurningSwipe", "InfernoAura"]
+        },
+        {
+          "PhaseIndex": 2,
+          "HealthThreshold": 0.3,
+          "Behaviours": ["Berserk", "HeavySlam", "BurningSwipe", "InfernoAura", "MeteorPlunge"]
+        }
+      ],
+      "TraitEvents": ["BossKilledEvent"]
+    }
+  ]
+}

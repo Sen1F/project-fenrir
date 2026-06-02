@@ -38,6 +38,7 @@
 A wide, open clearing. Ash Wolves roam in small packs of 2. No hazards. Long sight lines. This is where the player learns basic movement and light attack — not through a prompt, but through necessity.
 
 **Points of interest:**
+
 - **The Village Edge** — the origin village is visible in the distance (Loyalty signal for players who linger and look back)
 - **First Waystone** — immediately accessible; teaches checkpoint system implicitly
 - **Dead tree with scratch marks** — lore object: claw marks too large for any known creature (Curiosity signal if examined)
@@ -53,6 +54,7 @@ A wide, open clearing. Ash Wolves roam in small packs of 2. No hazards. Long sig
 The main traversal zone. Players pass through here multiple times. Sub-paths reward exploration. Ash Revenant enemies here teach the guard-break mechanic.
 
 **Points of interest:**
+
 - **Hidden hollow** — accessible only by leaving the main path; contains a rare lore fragment and a Curiosity/Exploration signal
 - **Abandoned camp** — a dead fire with scattered items; suggests others came before; Wisdom signal if the player reads the camp carefully (lore object)
 - **Flame Sprite nest** — a cluster of 5–6 sprites protecting a resource cache; rewards aggressive clearing
@@ -70,6 +72,7 @@ The main traversal zone. Players pass through here multiple times. Sub-paths rew
 The player's first encounter with a creature that is not purely hostile. Ember Stags are passive until provoked. Players who attack them increment Mercy↓ and Aggression↑. Players who walk among them without attacking increment Curiosity↑ and Mercy↑.
 
 **Points of interest:**
+
 - **The Scorched Circle** — a perfect ring of ash with no explanation; lore object; Wisdom signal; later revealed to be the site of an ancient elemental confrontation
 - **Waystone 2** — located here
 - **Hidden path** — a trail behind a cluster of rocks leads to the Doctrine Shrine (see §Doctrine Shrine)
@@ -87,6 +90,7 @@ The player's first encounter with a creature that is not purely hostile. Ember S
 A stone shrine unlike any other in the forest — older, deliberately maintained despite the surrounding decay. It is not an Evolution Shrine. It is a record shrine. A hidden archive left by the Fenrir Doctrine.
 
 **Contents:**
+
 - A lore fragment, partially legible:
 
 > *"...the element does not choose the worthy. It becomes what you make it. This is what they erased. This is what we preserve. If you are reading this, you found us before we found you."*
@@ -94,6 +98,7 @@ A stone shrine unlike any other in the forest — older, deliberately maintained
 - Beneath the text: a symbol that matches no known faction — it will appear again later in the game in contexts the player will recognise
 
 **Mechanics:**
+
 - No combat encounter here
 - Interacting with the lore fragment increments Curiosity↑, Wisdom↑
 - The shrine itself is an Evolution Shrine in dormant state (unlocks as active if evolution threshold is met on return)
@@ -108,6 +113,7 @@ A stone shrine unlike any other in the forest — older, deliberately maintained
 This is the highest-difficulty zone in Ember Forest before the boss. Combat encounters here are designed to punish reckless play — there is no room to reset distance. Players who rely on dodge-heavy play must adapt. Players who rely on blocking are at home.
 
 **Points of interest:**
+
 - **Ravine Shrine** — an Evolution Shrine in stirring or active state depending on player progress; the most likely location for a first evolution given it is encountered after significant play time
 - **The Ash Titan's Mark** — a massive handprint burned into the ravine wall; no context given; lore object for Wisdom signal; connects to post-MVP content (Tidal Marsh has a corresponding mark)
 - **Hidden alcove** — reachable by a narrow ledge path; contains a rare resource and an Exploration signal
@@ -127,6 +133,7 @@ A wide circular arena — open enough for movement, enclosed enough that there i
 **Pre-boss waystone:** Directly before the arena entrance. Cannot be missed.
 
 **Post-boss:**
+
 - Elemental barrier at the far end of the sanctum deactivates
 - A path opens toward the border of Ember Forest
 - A brief environmental shift — the ash in the area begins to cool; as if the forest is exhaling
@@ -137,7 +144,7 @@ A wide circular arena — open enough for movement, enclosed enough that there i
 ## Shrine Placement Summary
 
 | Shrine | Location | Default State |
-|---|---|---|
+| --- | --- | --- |
 | Doctrine Shrine | Hidden path off Ember Fields | Not an evolution shrine — lore only |
 | Ravine Shrine | Mid-Char Ravine | Stirring (active if threshold met) |
 | Sanctum Shrine | Post-boss in the Emberlord's Sanctum | Active (post-boss; highest-signal location) |
@@ -151,7 +158,7 @@ A player who finds neither shrine in time will have them available on return.
 ## Exploration Rewards Summary
 
 | Discovery | Location | Trait Signal |
-|---|---|---|
+| --- | --- | --- |
 | Dead tree with scratch marks | The Threshold | Curiosity↑ |
 | Hidden hollow | The Ashwood | Curiosity↑, Exploration↑ |
 | Abandoned camp (read carefully) | The Ashwood | Wisdom↑ |
@@ -165,10 +172,47 @@ A player who finds neither shrine in time will have them available on return.
 
 ---
 
+## Locked Decisions
+
+### Village NPCs (Locked)
+
+Three key characters in the origin village:
+
+**The Elder** — Runs the Awakening ceremony. Reacts to element rarity with body language, not words. Post-evolution, their dialogue shifts — subtle acknowledgment that something has changed.
+
+**A Friend** — Childhood connection. Gives the player their first task (a simple errand that teaches movement and world interaction). Provides a Loyalty anchor — returning to them increments Loyalty↑.
+
+**A Rival** — Another villager who Awakens around the same time. Their element and reaction to yours creates immediate social stakes. If the player has a Rare/Supreme element and the rival has Common, the tension reverses the usual hierarchy. Returns later in the story.
+
+### Day/Night Cycle (Locked)
+
+Real-time cycle. One full cycle = 20 real-world minutes.
+
+| Time | Effect |
+| --- | --- |
+| Dawn | Ash-grey light, creatures low activity, safe exploration window |
+| Day | Standard lighting, all creature types active |
+| Dusk | Ember-lit, creature aggression increases, best atmosphere for combat |
+| Night | Dark (torchlight radius applies), Inferno Wisps spawn, stealth viable |
+
+Resting at a waystone advances time to next dawn.
+
+### Merchant (Locked)
+
+One merchant in the origin village. Sells:
+
+- Consumables (health restores, temporary buffs)
+- Basic equipment upgrades (weapon/armour tier 1)
+- One "knowledge item" (a lore fragment that hints at the trait system without naming it)
+
+Spending patterns are tracked for trait signals (offensive vs defensive vs knowledge purchases).
+
+### Traversal (Locked)
+
+Ground-level only for MVP. No jump mechanic. Vertical paths (ledges, elevated zones) introduced in Phase 4 or post-MVP when Galeform's traversal advantage can be properly implemented.
+
 ## Open Questions
 
-- [ ] Does the origin village have any interactive NPCs in MVP, or is it purely the ceremony location?
-- [ ] Is there a day/night cycle in Ember Forest? (Inferno Wisps suggest nocturnal behaviour — this implies one)
-- [ ] Are there any merchant/trader characters in MVP, or is all equipment found in the world?
-- [ ] What is the region transition moment — is there a cutscene, a loading screen with a lore line, or a seamless walk-through?
-- [ ] Are there any platforming or traversal challenges (ledges, jumps) or is all movement combat-focused?
+- [ ] What is the region transition moment — cutscene, loading screen with lore line, or seamless?
+- [ ] Does the rival NPC Awaken with a specific element, or is it random?
+- [ ] Does the day/night cycle affect trait tracking (e.g. night exploration increments Curiosity more)?

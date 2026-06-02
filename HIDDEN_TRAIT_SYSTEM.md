@@ -31,7 +31,7 @@ The world reacts. The element changes. The player figures it out.
 Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**. All start at 50.0 (neutral) — not zero. This prevents early game behavior from disproportionately locking a player's identity.
 
 | Trait | High value means | Low value means |
-|---|---|---|
+| --- | --- |
 | **Aggression** | Attacks relentlessly, minimal defense | Patient, measured, defensive |
 | **Mercy** | Spares creatures, avoids unnecessary kills | Ruthless, efficient, eliminates threats |
 | **Curiosity** | Explores, experiments, seeks unknown | Focused, linear, goal-oriented |
@@ -49,8 +49,8 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 ### Combat Signals
 
-| Behavior | Trait(s) Modified | Direction |
-|---|---|---|
+| Behavior | Trait(s) Modified |
+| --- | --- |
 | Dodge used (per combat) | Patience ↑, Aggression ↓ |
 | Dodge never used (combat completed) | Aggression ↑, Recklessness ↑ |
 | Counter landed | Dominance ↑, Wisdom ↑ |
@@ -71,8 +71,8 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 ### Creature Signals
 
-| Behavior | Trait(s) Modified | Direction |
-|---|---|---|
+| Behavior | Trait(s) Modified |
+| --- | --- |
 | Spare a creature (disengage at low HP) | Mercy ↑, Curiosity ↑ |
 | Kill every creature in an area | Mercy ↓, Dominance ↑ |
 | Observe creature without attacking (linger >10s) | Curiosity ↑, Wisdom ↑ |
@@ -83,8 +83,8 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 ### World / NPC Signals
 
-| Behavior | Trait(s) Modified | Direction |
-|---|---|---|
+| Behavior | Trait(s) Modified |
+| --- | --- |
 | Choose mercy in dialogue | Mercy ↑, Loyalty ↑ |
 | Choose punishment in dialogue | Mercy ↓, Dominance ↑ |
 | Help an NPC (side quest completion) | Loyalty ↑, Wisdom ↑ |
@@ -97,8 +97,8 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 ### Economic Signals
 
-| Behavior | Trait(s) Modified | Direction |
-|---|---|---|
+| Behavior | Trait(s) Modified |
+| --- | --- |
 | Spend primarily on offensive upgrades | Aggression ↑ |
 | Spend primarily on defensive upgrades | Sacrifice ↑, Patience ↑ |
 | Spend on lore / knowledge items | Wisdom ↑, Curiosity ↑ |
@@ -107,8 +107,8 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 ### Exploration / Area Signals
 
-| Behavior | Trait(s) Modified | Direction |
-|---|---|---|
+| Behavior | Trait(s) Modified |
+| --- | --- |
 | % of region map revealed > 80% | Exploration ↑, Curiosity ↑ |
 | Take direct path to objective | Exploration ↓, Patience ↓ |
 | Spend extended time in dangerous zones | Aggression ↑, Recklessness ↑ |
@@ -123,11 +123,11 @@ Ten traits are tracked per character. Each value is a float in **[0.0, 100.0]**.
 
 Trait values do not jump by fixed amounts. Each signal applies a **weighted delta** based on context:
 
-```
+```text
 newValue = clamp(currentValue + (delta × weight × recencyMultiplier), 0.0, 100.0)
-```
-
+```text
 **Weight factors:**
+
 - **Event significance** — killing a boss contributes more than a routine kill
 - **Frequency dampening** — repeated identical actions have diminishing returns (prevents grinding)
 - **Recency multiplier** — recent behavior carries more weight than old behavior (rolling window)
@@ -136,19 +136,17 @@ newValue = clamp(currentValue + (delta × weight × recencyMultiplier), 0.0, 100
 
 For any repeatable action, the delta halves after the 5th occurrence in a session and again after the 10th. This prevents a player from spamming dodge or spare actions to force a trait value.
 
-```
+```text
 effectiveDelta = baseDelta × (0.5 ^ max(0, occurrenceCount - 5) / 5)
-```
-
+```text
 ### Decay
 
 Traits decay toward 50.0 (neutral) over real time when not actively played. Decay rate is slow — not enough to punish short sessions, but enough that a player who completely changes their style over weeks will see their traits shift.
 
-```
+```text
 decayedValue = currentValue + (50.0 - currentValue) × decayRate × daysSinceLastPlay
 decayRate = 0.02 (2% drift toward neutral per day of inactivity)
-```
-
+```text
 **MVP note:** Disable decay for MVP. Implement accumulation-only for the prototype. Decay adds tuning complexity before the core loop is validated.
 
 ---
@@ -159,31 +157,34 @@ Each evolution requires a **trait signature** — a set of traits that must meet
 
 ### Example: Fire Element Evolutions (MVP)
 
-**Inferno**
-```
+#### Inferno
+
+```text
 Aggression   ≥ 70
 Dominance    ≥ 65
 Mercy        ≤ 35
 Recklessness ≥ 55
-```
+```text
 *Profile: A relentless fighter who dominates engagements and shows no mercy.*
 
 **Phoenix Flame** *(post-MVP)*
-```
+
+```text
 Sacrifice    ≥ 70
 Mercy        ≥ 60
 Exploration  ≥ 65
 Loyalty      ≥ 55
-```
+```text
 *Profile: Someone who endures hardship, protects others, and wanders widely.*
 
 **Plasma** *(post-MVP)*
-```
+
+```text
 Curiosity    ≥ 70
 Wisdom       ≥ 65
 Aggression   ≥ 55
 Patience     ≤ 40
-```
+```text
 *Profile: A fast, intelligent fighter who learns systems and exploits them.*
 
 ### Signature Resolution
@@ -205,7 +206,7 @@ Evolution does not happen automatically when thresholds are met. The player must
 ### Shrine Behavior States
 
 | State | Condition | Visual |
-|---|---|---|
+| --- | --- |
 | **Dormant** | No evolution eligible | Dark, inert stone |
 | **Stirring** | Any evolution >80% of threshold | Faint elemental glow — matches player's element |
 | **Active** | Any evolution fully eligible | Bright pulse, audible hum |
@@ -257,8 +258,7 @@ struct TraitProfile: Codable {
         )
     }
 }
-```
-
+```text
 ### Event System
 
 ```swift
@@ -293,18 +293,16 @@ final class TraitAccumulator {
     func applyDecay(to profile: inout TraitProfile, daysSinceLastPlay: Double)
     func checkEvolutionEligibility(profile: TraitProfile, element: Element) -> [EvolutionCandidate]
 }
-```
-
+```text
 ### Separation of Concerns
 
-```
+```text
 GameScene  →  emits BehaviorEvent  →  TraitAccumulator  →  updates TraitProfile
                                                         ↓
                                               EvolutionEligibilityChecker
                                                         ↓
                                               ShrineStateManager  →  updates shrine visuals
-```
-
+```text
 Game logic emits events. It never reads trait values. The accumulator owns all trait math. This keeps game systems clean and makes the trait engine independently testable.
 
 ### Persistence
@@ -317,11 +315,10 @@ TraitProfile is serialised as part of the character save file (JSON, not Keychai
 
 The specific threshold values (e.g. Aggression ≥ 70 for Inferno) and delta weights are **tuning variables**, not hardcoded constants. They live in a config file:
 
-```
+```text
 /Config/TraitWeights.json
 /Config/EvolutionSignatures.json
-```
-
+```text
 This allows threshold tuning without a code change. In Phase 4 (Polish), run playtesting sessions with logging enabled to observe real trait distributions and adjust thresholds so evolutions trigger at the right pace — not too early (trivialises the system), not so late that players never see one.
 
 **Target:** A focused player should see their first evolution between 8–15 hours of play in a single region.
@@ -338,13 +335,17 @@ No further hints are given. No numerical values. No system explanation. The jour
 
 ---
 
+## Locked Decisions
+
+- [x] **Trait carryover:** 30% shift toward neutral on every evolution, at every tier. Consistent rule.
+- [x] **Evolution lock:** Tier 1 is permanent. No dead ends — every Tier 1 form has Tier 2 paths. But Tier 1 cannot be changed within a playthrough.
+- [x] **Post-evolution NPC and creature reactions:** Both react. NPCs comment and rumors spread (Ascendant network notices). Creatures behave differently — the evolved form is recognisable to them in ways the player doesn't yet understand. This is a lore hint: creatures have memory of elemental forms that predates the current civilisation.
+- [x] **Fenrir Doctrine and shrine locations:** The Doctrine built the evolution shrines. This is not stated explicitly to the player but is discoverable through lore fragments. The Doctrine maintains them. The Ascendants have been trying to find and suppress them for centuries — which is why shrines are hidden, worn, and deliberately difficult to locate.
+
 ## Open Questions
 
-- [ ] Should trait values reset partially on evolution, or fully carry forward to the next evolution tier?
-- [ ] Do certain evolution forms lock off further evolutions (a dead end), or can every form continue evolving?
-- [ ] Is there a maximum number of evolutions per playthrough, or infinite?
-- [ ] Do NPCs or creatures react differently to the player after evolution (recognising the new form)?
-- [ ] Should the Fenrir Doctrine be connected to shrine locations narratively — i.e., they built them?
+- [ ] Is there a maximum number of evolutions per playthrough (cap at Tier 3), or can each tier continue indefinitely?
+- [ ] Do night-time exploration actions increment Curiosity at a higher rate than daytime?
 
 ---
 

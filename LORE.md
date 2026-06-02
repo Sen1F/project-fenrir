@@ -217,10 +217,30 @@ The following lines are locked. They may appear in the game verbatim and must no
 
 ---
 
+## Locked Lore Decisions
+
+### Fenrir's Existence
+
+**Deliberately unresolved.** The game never confirms whether Fenrir still exists. Evidence in the world supports both possibilities. Players will debate it. This is intentional and canonical — the mystery of Fenrir's existence is part of the mystery of his final evolution.
+
+### The Predecessors
+
+Others came before Fenrir. The Doctrine keeps their records — names, elements, how far they got, where they failed. The world does not know they existed; the Doctrine ensured their stories were not erased as Fenrir's was. Their failures are discoverable. One predecessor is particularly close to Fenrir's level — their story is a cautionary fragment for players who find it.
+
+### Supreme Rulers — The Partial Lie
+
+**Some are real, some are fabricated.** The most powerful Ascendant rulers genuinely possess Supreme elements — this is what made the hierarchy initially credible. But lesser noble houses, regional governors, and minor ruling families have maintained power through fabrication, suppression of evidence, and controlling who performs Awakenings and records results. The system is built on a real foundation and a constructed superstructure. This makes the Ascendants more complex: they are not purely lying, which makes them harder to dismiss.
+
+### The Reawakening
+
+**A natural cycle — the Doctrine knows.** Every few centuries, the barriers between elemental states weaken. Ancient shrines stir. Evolution patterns that were suppressed re-emerge. The Doctrine has documented this cycle across generations and prepares for these windows. The current cycle is the strongest in recorded history — the Doctrine does not yet know why. The Ascendants know the cycle exists but have spent centuries trying to suppress it rather than understand it.
+
+### The Ascendants — Internal Fracture
+
+No organised internal faction — but individuals within the Ascendant structure privately doubt or privately believe the Doctrine. These individuals are discoverable as NPCs who speak carefully, who give the player information that technically shouldn't be available, who react to the player's evolution with something closer to recognition than fear. They do not form a conspiracy. They are isolated, careful, and afraid. But they exist.
+
 ## Open Lore Questions
 
-- [ ] Does Fenrir still exist? Is he alive, dormant, or transformed into something non-human?
-- [ ] Were there others before Fenrir who attempted the same path and failed?
-- [ ] What triggered the present-day reawakening — is it connected to the player specifically, or is the player simply one of many who feel the change?
-- [ ] Are the Ascendants entirely antagonistic, or are there factions within them who privately believe the Doctrine?
-- [ ] What is the Ascendants' origin element? Do the ruling families actually have Supreme elements, or was that itself a fabrication?
+- [ ] What is the Doctrine's organisational structure — a loose network, a council, a single keeper?
+- [ ] Is there a name for the world / the civilisation? (Required before writing dialogue)
+- [ ] What language are the dead-language texts written in — and does the player ever learn to read them, or only find translations?

@@ -21,13 +21,17 @@ namespace Fenrir.Editor
         [MenuItem("Fenrir/Setup/Setup Bootstrap Scene")]
         public static void SetupBootstrapScene()
         {
+            // Register all tags the game needs before assigning any
+            FenrirEditorUtils.EnsureTag("Player");
+            FenrirEditorUtils.EnsureTag("Enemy");
+            FenrirEditorUtils.EnsureTag("GameController");
+
             GameObject manager = GetOrCreate(ManagerName);
 
             EnsureComponent<Bootstrap>(manager);
             EnsureComponent<AppStateMachine>(manager);
             EnsureComponent<GameLoop>(manager);
 
-            // Tag so SceneValidator can find it
             manager.tag = "GameController";
 
             // Build Settings: ensure Bootstrap is scene 0

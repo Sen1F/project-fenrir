@@ -71,11 +71,7 @@ namespace Fenrir.Combat
         {
             bool wasClear = _activeEnemies.Count == 0;
             _activeEnemies.Add(enemy);
-
-            if (_activeEnemies.Count > _peakEnemyCount)
-                _peakEnemyCount = _activeEnemies.Count;
-
-            if (wasClear) BeginCombat();
+            if (wasClear) BeginCombat();   // zone count snapshotted inside BeginCombat
         }
 
         public void UnregisterEnemy(EnemyBase enemy)
@@ -112,15 +108,33 @@ namespace Fenrir.Combat
             _combatStartTime       = Time.time;
             _playerDodgedThisFight = false;
             _hitsWithoutDodge      = 0;
-            _peakEnemyCount        = _activeEnemies.Count;
             _damageDealtPerEnemy.Clear();
+
+            // Group = all living enemies present in the zone, not just aggroed ones.
+            // A player fighting one wolf while two more patrol nearby is still a group fight.
+            _peakEnemyCount = CountLivingEnemiesInZone();
 
             SceneRouter.SetGameState(GameState.Combat);
 
             if (ServiceLocator.TryGet<AudioManager>(out AudioManager audio))
                 audio.StartCombatMusic();
 
-            Debug.Log("[CombatContext] Combat started.");
+            Debug.Log($"[CombatContext] Combat started. Zone enemies: {_peakEnemyCount}");
+        }
+
+        /// <summary>
+        /// Counts all EnemyHealth components in the scene that are alive.
+        /// Intentionally includes non-aggroed enemies — the zone defines the threat context.
+        /// </summary>
+        private static int CountLivingEnemiesInZone()
+        {
+            int count = 0;
+            foreach (Entities.Enemies.EnemyHealth h in
+                     FindObjectsByType<Entities.Enemies.EnemyHealth>(FindObjectsSortMode.None))
+            {
+                if (!h.IsDead) count++;
+            }
+            return count;
         }
 
         private void EndCombat()

@@ -48,11 +48,17 @@
 - [x] SaveManager (JSON) — code complete + unit tested
 - [x] AudioManager + MusicLayer + SFXPool — wired to DayNightCycle
 - [x] HUD — EnergyBar + health bar code complete
-- [ ] NavMesh baked in EmberForest
+- [x] `FenrirBootstrapSetup` editor script — one-click Bootstrap scene wiring
+- [x] `EventLogger` — trait delta output (event key + Δ per trait + current value)
+- [x] `BehaviorEventBus.Clear()` scoped to full-scene transitions; Bootstrap re-subscribes accumulator after each
+- [x] `InputHandler` — touch guard fixed; touch input now works on device
+- [x] `AwakeningSequencer` — routes through `SceneRouter` instead of `SceneManager`
+- [x] `JournalController` — evolution entry keys corrected to match `EvolutionChecker` IDs
+- [ ] NavMesh baked in EmberForest (Unity Editor)
 - [ ] First enemy alive in Play mode (Ash Wolf patrol + chase)
-- [ ] Trait events firing live (dodge → Patience ↑ confirmed in logs)
+- [ ] Trait events firing live — confirm "dodge → Patience +2.0" in Console
 - [ ] Save/Load round-trip verified in Play mode
-- [ ] Bootstrap scene fully wired in Unity Inspector
+- [ ] Bootstrap scene wired via Fenrir → Setup → Setup Bootstrap Scene
 
 ## Phase 3 — MVP Gameplay
 

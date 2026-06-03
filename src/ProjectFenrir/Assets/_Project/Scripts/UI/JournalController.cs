@@ -23,11 +23,12 @@ namespace Fenrir.UI
         private bool _isOpen;
 
         // ── Pre-authored vague flavour lines keyed by evolution ID ────────────
+        // Keys must match EvolutionChecker signature IDs exactly (EvolutionSignatures.json)
         private static readonly Dictionary<string, string> EvolutionEntries = new()
         {
-            ["inferno_form"]      = "The heat no longer frightens you. It feels like a memory.",
+            ["inferno"]           = "The heat no longer frightens you. It feels like a memory.",
             ["abyssal_current"]   = "You move through water as though it always knew you were coming.",
-            ["bedrock_stance"]    = "Something in your chest has settled. You are harder to move.",
+            ["bedrock"]           = "Something in your chest has settled. You are harder to move.",
             ["galeform"]          = "The air parts for you now. Or perhaps it always did.",
         };
 

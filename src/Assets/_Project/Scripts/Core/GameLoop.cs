@@ -1,10 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Fenrir.Save;
-using Fenrir.StateMachine;
 using Fenrir.Traits;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Fenrir.Core
 {
@@ -12,38 +10,41 @@ namespace Fenrir.Core
     /// Drives the top-level game loop:
     ///   - Pause / resume (Time.timeScale + SceneRouter state)
     ///   - Application focus / pause → debounced auto-save on background
+    ///   - Full-scene transitions → clears BehaviorEventBus stale handlers
     ///
-    /// Attach to the Bootstrap GameObject (DontDestroyOnLoad).
-    /// Registered with ServiceLocator in Bootstrap.
+    /// Additive sub-zone loads (RegionLoader) do NOT clear the bus — only
+    /// full SceneRouter transitions do, preventing trait subscriptions from
+    /// being wiped mid-gameplay.
     /// </summary>
     public class GameLoop : MonoBehaviour
     {
         public bool IsPaused { get; private set; }
 
-        // Debounce: OnApplicationPause + OnApplicationFocus both fire on iOS background
         private bool _savePending;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void OnEnable()
         {
-            SceneManager.sceneUnloaded += OnSceneUnloaded;
+            // Subscribe to full-scene completions only — NOT SceneManager.sceneUnloaded,
+            // which also fires for additive sub-zone unloads from RegionLoader.
+            SceneRouter.OnSceneLoadComplete += OnFullSceneTransitionComplete;
         }
 
         private void OnDisable()
         {
-            SceneManager.sceneUnloaded -= OnSceneUnloaded;
+            SceneRouter.OnSceneLoadComplete -= OnFullSceneTransitionComplete;
         }
 
         /// <summary>
-        /// Clear event bus on every scene unload to prevent stale MonoBehaviour
-        /// callbacks from destroyed scene objects firing during the next scene.
-        /// Bootstrap (DontDestroyOnLoad) resubscribes its own handlers after load.
+        /// Called after every full SceneRouter navigation.
+        /// Clears stale scene-object handlers from the destroyed scene.
+        /// Bootstrap (DontDestroyOnLoad) re-subscribes the TraitAccumulator immediately after.
         /// </summary>
-        private static void OnSceneUnloaded(Scene _)
+        private static void OnFullSceneTransitionComplete()
         {
             BehaviorEventBus.Clear();
-            Debug.Log("[GameLoop] BehaviorEventBus cleared on scene unload.");
+            Debug.Log("[GameLoop] BehaviorEventBus cleared after full scene transition.");
         }
 
         // ── Pause / Resume ────────────────────────────────────────────────────
@@ -53,7 +54,6 @@ namespace Fenrir.Core
             if (IsPaused) return;
             IsPaused       = true;
             Time.timeScale = 0f;
-            // Use the router's internal setter so CurrentAppState stays accurate
             SceneRouter.SetPaused(true);
             Debug.Log("[GameLoop] Paused");
         }
@@ -67,34 +67,19 @@ namespace Fenrir.Core
             Debug.Log("[GameLoop] Resumed");
         }
 
-        public void TogglePause()
-        {
-            if (IsPaused) Resume(); else Pause();
-        }
+        public void TogglePause() { if (IsPaused) Resume(); else Pause(); }
 
         // ── Application lifecycle ─────────────────────────────────────────────
 
-        private void OnApplicationPause(bool paused)
-        {
-            if (paused) RequestSave();
-        }
-
-        private void OnApplicationFocus(bool focused)
-        {
-            if (!focused) RequestSave();
-        }
-
-        private void OnApplicationQuit()
-        {
-            // Synchronous path on quit — fire-and-forget with error logging
-            _ = TrySaveAsync();
-        }
+        private void OnApplicationPause(bool paused)  { if (paused)   RequestSave(); }
+        private void OnApplicationFocus(bool focused) { if (!focused) RequestSave(); }
+        private void OnApplicationQuit()              { _ = TrySaveAsync(); }
 
         // ── Debounced save ────────────────────────────────────────────────────
 
         private void RequestSave()
         {
-            if (_savePending) return; // de-duplicate the double-fire on iOS background
+            if (_savePending) return;
             _savePending = true;
             _ = TrySaveAsync();
         }

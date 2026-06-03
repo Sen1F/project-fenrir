@@ -2,7 +2,6 @@ using System.Collections;
 using Fenrir.Core;
 using Fenrir.Save;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Fenrir.Awakening
 {
@@ -18,7 +17,7 @@ namespace Fenrir.Awakening
     /// </summary>
     public class AwakeningSequencer : MonoBehaviour
     {
-        [SerializeField] private string _gameScene = "EmberForest";
+        // Scene name removed — navigation goes through SceneRouter, never SceneManager directly
 
         [Header("UI Panels")]
         [SerializeField] private GameObject _characterCreationPanel;
@@ -75,9 +74,9 @@ namespace Fenrir.Awakening
             // ElementRevealUI reads save to display element name/VFX
             yield return new WaitForSeconds(_elementRevealHoldSeconds);
 
-            // 4. Load game
+            // 4. Load game via SceneRouter so AppState, audio, and bus clear are all handled
             ShowPanel(_loadingPanel);
-            SceneManager.LoadScene(_gameScene);
+            yield return SceneRouter.LoadGameAsync().AsCoroutine();
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

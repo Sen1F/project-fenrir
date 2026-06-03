@@ -28,6 +28,29 @@ namespace Fenrir.Core
             await RouteToInitialSceneAsync();
         }
 
+        private void OnEnable()
+        {
+            // After every full scene transition, GameLoop clears the bus.
+            // Bootstrap re-subscribes the accumulator immediately so trait
+            // tracking resumes in the new scene. Additive sub-zone loads
+            // do NOT clear the bus, so no re-subscription needed there.
+            SceneRouter.OnSceneLoadComplete += ResubscribeAccumulator;
+        }
+
+        private void OnDisable()
+        {
+            SceneRouter.OnSceneLoadComplete -= ResubscribeAccumulator;
+        }
+
+        private void ResubscribeAccumulator()
+        {
+            if (ServiceLocator.TryGet<ITraitAccumulator>(out ITraitAccumulator acc))
+            {
+                SubscribeAccumulatorToBus(acc);
+                Debug.Log("[Bootstrap] TraitAccumulator re-subscribed after scene transition.");
+            }
+        }
+
         // ── Service registration ──────────────────────────────────────────────
 
         private void RegisterServices()
@@ -82,8 +105,19 @@ namespace Fenrir.Core
                 ServiceLocator.Get<IEvolutionChecker>()
             );
             ServiceLocator.Register<ITraitAccumulator>(accumulator);
+            SubscribeAccumulatorToBus(accumulator);
+        }
 
-            // Subscribe to every concrete event type (bus is keyed by concrete type)
+        /// <summary>
+        /// Subscribes the accumulator to every concrete BehaviorEvent type.
+        /// Called on initial load and after every full scene transition (bus clear).
+        /// BehaviorEventBus.Subscribe is idempotent — safe to call multiple times.
+        /// </summary>
+        private static void SubscribeAccumulatorToBus(ITraitAccumulator acc)
+        {
+            // Cast required — Process(BehaviorEvent) is on TraitAccumulator, not the interface
+            if (acc is not TraitAccumulator accumulator) return;
+
             BehaviorEventBus.Subscribe<DodgeUsedEvent>(accumulator.Process);
             BehaviorEventBus.Subscribe<CounterLandedEvent>(accumulator.Process);
             BehaviorEventBus.Subscribe<PerfectBlockEvent>(accumulator.Process);

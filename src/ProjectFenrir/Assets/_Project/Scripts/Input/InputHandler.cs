@@ -5,7 +5,8 @@ namespace Fenrir.Input
 {
     /// <summary>
     /// Raw input layer using Unity Input System (new).
-    /// Forwards to GestureRecognizer (touch) or processes keyboard directly (Editor).
+    /// On iOS/Android: forwards touch to GestureRecognizer.
+    /// In Editor/PC: processes keyboard directly.
     /// </summary>
     public class InputHandler : MonoBehaviour
     {
@@ -14,7 +15,6 @@ namespace Fenrir.Input
 
         private void Awake()
         {
-            // Auto-find on same GameObject if not wired via Inspector
             if (_gesture == null) _gesture = GetComponent<GestureRecognizer>();
             if (_mapper  == null) _mapper  = GetComponent<TouchMapper>();
         }
@@ -22,23 +22,22 @@ namespace Fenrir.Input
         private void Update()
         {
             if (_mapper == null) return;
-            if (Keyboard.current == null) return;
 
 #if UNITY_IOS || UNITY_ANDROID
+            // Touch path — Keyboard.current is null on device; guard must NOT block this
             ProcessTouches();
 #else
-            ProcessKeyboard();
+            // Editor / PC — keyboard may still be null if Input System isn't configured
+            if (Keyboard.current != null)
+                ProcessKeyboard();
 #endif
         }
 
-        private void ProcessTouches()
-        {
-            _gesture?.Tick();
-        }
+        private void ProcessTouches() => _gesture?.Tick();
 
         private void ProcessKeyboard()
         {
-            var kb = Keyboard.current;
+            Keyboard kb = Keyboard.current;
 
             float h = 0f, v = 0f;
             if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) h =  1f;

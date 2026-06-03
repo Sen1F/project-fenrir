@@ -21,7 +21,10 @@ namespace Fenrir.Entities.Player
         public bool  IsDead            { get; private set; }
 
         public event Action        OnDied;
-        public event Action<float> OnDamaged;   // normalised HP after hit
+        public event Action<float> OnDamaged;      // normalised HP after hit
+
+        /// <summary>Set immediately before OnDied fires. Read by DeathMessageProvider.</summary>
+        public PlayerDeathType LastDeathType { get; private set; } = PlayerDeathType.None;
 
         private HitStateManager _hitState;
 
@@ -119,6 +122,7 @@ namespace Fenrir.Entities.Player
             // 1. Ambush — died within 5s of combat start → no trait shift
             if (_inCombat && (Time.time - _combatStartTime) < 5f)
             {
+                LastDeathType = PlayerDeathType.Ambush;
                 BehaviorEventBus.Emit(new DeathAmbushEvent());
                 return;
             }
@@ -126,14 +130,15 @@ namespace Fenrir.Entities.Player
             // 2. Pattern failure — 3rd+ death vs the same enemy type
             if (_consecutiveDeathsVsSameEnemy >= 2)
             {
+                LastDeathType = PlayerDeathType.PatternFail;
                 BehaviorEventBus.Emit(new DeathPatternFailEvent());
                 return;
             }
 
-            // 3. Sacrifice — fought at low HP (<25%) AND dealt only minor damage
-            //    (< 25% of any single enemy's max HP) OR faced a group (2+ enemies)
+            // 3. Sacrifice — attacked at low HP AND (group fight OR minor damage dealt)
             if (_attackedWhileLowHp && IsSacrificeDeath())
             {
+                LastDeathType = PlayerDeathType.Sacrifice;
                 BehaviorEventBus.Emit(new DeathSacrificeEvent());
                 return;
             }
@@ -141,11 +146,13 @@ namespace Fenrir.Entities.Player
             // 4. Reckless — 3+ unblocked hits, no dodge or block
             if (_hitsTakenThisCombat >= 3)
             {
+                LastDeathType = PlayerDeathType.Reckless;
                 BehaviorEventBus.Emit(new DeathRecklessEvent());
                 return;
             }
 
             // 5. Overwhelmed — fallback
+            LastDeathType = PlayerDeathType.Overwhelmed;
             BehaviorEventBus.Emit(new DeathOverwhelmedEvent());
         }
 
@@ -167,9 +174,10 @@ namespace Fenrir.Entities.Player
 
         public void Revive(float hpFraction = 1f)
         {
-            IsDead             = false;
+            IsDead              = false;
             _attackedWhileLowHp = false;
-            Current            = _maxHp * Mathf.Clamp01(hpFraction);
+            LastDeathType       = PlayerDeathType.None;
+            Current             = _maxHp * Mathf.Clamp01(hpFraction);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Fenrir.Evolution
             ShrineState next;
             if (candidates.Length == 0)
                 next = ShrineState.Dormant;
-            else if (candidates[0].FitScore < 0.5f)
+            else if (candidates[0].FitScore < Config.GameConfig.ShrineActiveFitThreshold)
                 next = ShrineState.Stirring;
             else
                 next = ShrineState.Active;

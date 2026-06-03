@@ -67,10 +67,10 @@ namespace Fenrir.World
 
         private static DayPhase ComputePhase(float t) => t switch
         {
-            < 0.15f => DayPhase.Dawn,
-            < 0.50f => DayPhase.Day,
-            < 0.70f => DayPhase.Dusk,
-            _       => DayPhase.Night
+            var v when v < GameConfig.DawnEndFraction => DayPhase.Dawn,
+            var v when v < GameConfig.DayEndFraction  => DayPhase.Day,
+            var v when v < GameConfig.DuskEndFraction => DayPhase.Dusk,
+            _                                         => DayPhase.Night
         };
     }
 }

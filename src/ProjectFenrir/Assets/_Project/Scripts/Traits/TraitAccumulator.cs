@@ -34,7 +34,7 @@ namespace Fenrir.Traits
                 Profile.Apply(key, entry.Value * dampen);
             }
 
-            Profile.LastUpdated = DateTime.UtcNow;
+            Profile.LastUpdatedUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         public void ApplyDecay(float daysSinceLastPlay)
@@ -61,7 +61,7 @@ namespace Fenrir.Traits
 
             // Halves every FrequencyDampenAfter occurrences
             int steps = (count - GameConfig.FrequencyDampenAfter) / GameConfig.FrequencyDampenAfter;
-            return Mathf.Pow(0.5f, steps + 1);
+            return Mathf.Pow(GameConfig.FrequencyDampenFactor, steps + 1);
         }
     }
 }

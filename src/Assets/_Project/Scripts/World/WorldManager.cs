@@ -6,69 +6,62 @@ using UnityEngine;
 namespace Fenrir.World
 {
     /// <summary>
-    /// Scene-level singleton for the game world.
-    /// Owns day/night cycle reference, manages shrine/secret tracking,
-    /// and writes world-state changes to save.
+    /// Scene-level manager for the game world.
+    /// Registered with ServiceLocator on Awake — access via
+    ///   ServiceLocator.Get&lt;WorldManager&gt;()
+    /// No static singleton; complies with architecture rules.
     /// </summary>
     public class WorldManager : MonoBehaviour
     {
         [SerializeField] private DayNightCycle _dayNight;
 
-        public static WorldManager Instance { get; private set; }
-
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
+            ServiceLocator.Register<WorldManager>(this);
+            if (_dayNight == null) _dayNight = FindAnyObjectByType<DayNightCycle>();
+        }
+
+        private void OnDestroy()
+        {
+            ServiceLocator.Unregister<WorldManager>();
         }
 
         private void Start()
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out var save)) return;
+            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
 
-            // Restore world time from save
             _dayNight?.InitializeFromSave(save.Current.World.TimeOfDay);
 
-            // Subscribe to phase changes to persist time-of-day
             if (_dayNight != null)
                 _dayNight.OnPhaseChanged += _ => PersistTimeOfDay();
         }
 
-        // ── Public API (called by world scripting) ────────────────────────────
+        // ── Public API ────────────────────────────────────────────────────────
 
         public void MarkSecretDiscovered(string secretId)
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out var save)) return;
-            var secrets = save.Current.World.DiscoveredSecrets;
-            if (!secrets.Contains(secretId))
-            {
-                secrets.Add(secretId);
-                save.MarkDirty();
-                BehaviorEventBus.Emit(new SecretAreaDiscoveredEvent());
-            }
+            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
+            if (save.Current.World.DiscoveredSecrets.Contains(secretId)) return;
+            save.Current.World.DiscoveredSecrets.Add(secretId);
+            save.MarkDirty();
+            BehaviorEventBus.Emit(new SecretAreaDiscoveredEvent());
         }
 
         public void MarkQuestCompleted(string questId)
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out var save)) return;
-            var quests = save.Current.World.CompletedQuests;
-            if (!quests.Contains(questId))
-            {
-                quests.Add(questId);
-                save.MarkDirty();
-                BehaviorEventBus.Emit(new QuestCompletedEvent());
-            }
+            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
+            if (save.Current.World.CompletedQuests.Contains(questId)) return;
+            save.Current.World.CompletedQuests.Add(questId);
+            save.MarkDirty();
+            BehaviorEventBus.Emit(new QuestCompletedEvent());
         }
 
         public void MarkShrineActivated(string shrineId)
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out var save)) return;
-            var shrines = save.Current.World.ActivatedShrines;
-            if (!shrines.Contains(shrineId))
-            {
-                shrines.Add(shrineId);
-                save.MarkDirty();
-            }
+            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
+            if (save.Current.World.ActivatedShrines.Contains(shrineId)) return;
+            save.Current.World.ActivatedShrines.Add(shrineId);
+            save.MarkDirty();
         }
 
         public void OnPlayerRested()
@@ -81,7 +74,7 @@ namespace Fenrir.World
 
         private void PersistTimeOfDay()
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out var save)) return;
+            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
             save.Current.World.TimeOfDay = _dayNight != null ? _dayNight.NormalizedTime : 0f;
             save.MarkDirty();
         }

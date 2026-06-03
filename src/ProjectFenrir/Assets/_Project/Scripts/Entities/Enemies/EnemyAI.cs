@@ -24,10 +24,11 @@ namespace Fenrir.Entities.Enemies
         private NavMeshAgent _agent;
 
         // ── State ─────────────────────────────────────────────────────────────
-        private AIState  _state        = AIState.Idle;
+        private AIState   _state        = AIState.Idle;
         private Transform _target;
-        private float    _attackCooldown;
-        private float    _staggerTimer;
+        private Transform _cachedPlayer;   // cached once; never call FindWithTag in Update
+        private float     _attackCooldown;
+        private float     _staggerTimer;
 
         private void Awake()
         {
@@ -36,6 +37,13 @@ namespace Fenrir.Entities.Enemies
             _agent  = GetComponent<NavMeshAgent>();
 
             _health.OnDied += HandleDeath;
+        }
+
+        private void Start()
+        {
+            // Cache player once at scene start — FindWithTag must NOT run in Update
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null) _cachedPlayer = player.transform;
         }
 
         private void Update()
@@ -53,7 +61,7 @@ namespace Fenrir.Entities.Enemies
 
         private void TickIdle()
         {
-            _target = FindPlayer();
+            _target = _cachedPlayer;
             if (_target == null) return;
 
             float dist = Vector3.Distance(transform.position, _target.position);
@@ -117,11 +125,7 @@ namespace Fenrir.Entities.Enemies
             GetComponent<EnemyCombat>()?.Attack(_target.gameObject);
         }
 
-        private static Transform FindPlayer()
-        {
-            var go = GameObject.FindWithTag("Player");
-            return go != null ? go.transform : null;
-        }
+        // FindWithTag removed — player is cached in Start() via _cachedPlayer.
 
         private void TransitionTo(AIState next)
         {

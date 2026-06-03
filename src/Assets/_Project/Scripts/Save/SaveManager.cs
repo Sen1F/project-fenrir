@@ -22,7 +22,7 @@ namespace Fenrir.Save
         {
             try
             {
-                Current.SavedAt = DateTime.UtcNow;
+                Current.SavedAtUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 string json = JsonUtility.ToJson(Current, prettyPrint: true);
                 await File.WriteAllTextAsync(_savePath, json);
                 _isDirty = false;

@@ -1,3 +1,4 @@
+using Fenrir.Core;
 using Fenrir.Entities.Player;
 using UnityEngine;
 
@@ -16,11 +17,12 @@ namespace Fenrir.Input
 
         private void Awake()
         {
-            if (_controller == null)
-                _controller = FindAnyObjectByType<PlayerController>();
-            if (_combat == null)
-                _combat = FindAnyObjectByType<PlayerCombat>();
+            if (_controller == null) _controller = FindAnyObjectByType<PlayerController>();
+            if (_combat == null)     _combat     = FindAnyObjectByType<PlayerCombat>();
+            ServiceLocator.Register<TouchMapper>(this);
         }
+
+        private void OnDestroy() => ServiceLocator.Unregister<TouchMapper>();
 
         // ── Movement ──────────────────────────────────────────────────────────
 

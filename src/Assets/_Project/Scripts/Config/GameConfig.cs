@@ -12,6 +12,7 @@ namespace Fenrir.Config
         public const float TraitEvolutionCarryover = 0.30f; // 30% shift toward neutral on evolution
         public const float TraitDecayRatePerDay  = 0.02f;   // disabled in MVP
         public const int   FrequencyDampenAfter  = 5;       // dampening kicks in after N identical events/session
+        public const float FrequencyDampenFactor = 0.5f;   // each extra step halves the delta
 
         // ── Awakening ────────────────────────────────────────────────────────
         public const int   MaxCharacterSlots     = 2;
@@ -34,6 +35,10 @@ namespace Fenrir.Config
 
         // ── Day / Night ──────────────────────────────────────────────────────
         public const float DayNightCycleDurationSeconds = 1200f; // 20 minutes
+        /// <summary>Normalised time fractions marking phase boundaries (0–1 over full cycle).</summary>
+        public const float DawnEndFraction  = 0.15f;
+        public const float DayEndFraction   = 0.50f;
+        public const float DuskEndFraction  = 0.70f;
 
         // ── XP ───────────────────────────────────────────────────────────────
         public const float XpMultiplierBossKill      = 5f;
@@ -55,6 +60,10 @@ namespace Fenrir.Config
         // ── Elemental Resistance ─────────────────────────────────────────────
         public const float ElementalResistanceMod  = -0.25f; // same element
         public const float ElementalWeaknessMod    =  0.25f; // opposite element
+
+        // ── Shrine ───────────────────────────────────────────────────────────
+        /// <summary>FitScore at or above this value transitions shrine from Stirring → Active.</summary>
+        public const float ShrineActiveFitThreshold   = 0.5f;
 
         // ── Save ─────────────────────────────────────────────────────────────
         public const string SaveFileName         = "save.json";

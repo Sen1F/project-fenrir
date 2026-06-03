@@ -13,7 +13,7 @@
 
 ## Phase 1 — Repo / Foundation 🔄 IN PROGRESS
 
-**Engine:** Unity 2022 LTS | **Language:** C# | **Pipeline:** URP
+**Engine:** Unity 6 LTS | **Language:** C# | **Pipeline:** URP
 
 - [ ] Unity project created, URP configured
 - [ ] New Input System installed

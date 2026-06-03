@@ -10,7 +10,7 @@
 
 | Layer | Choice | Rationale |
 | --- | --- | --- |
-| Engine | Unity 2022 LTS | Proven stable, long-term support, strong iOS export |
+| Engine | Unity 6 LTS | Proven stable, long-term support, strong iOS export |
 | Render pipeline | URP (Universal Render Pipeline) | Mobile-optimised, supports custom shaders, good lighting |
 | Language | C# (.NET Standard 2.1) | Unity standard |
 | Input | Unity New Input System | Touch-native, action-map based |
@@ -294,7 +294,7 @@ Tested on-device only. Unit tests use `IKeychainBridge` mock returning a fixed s
 
 ## Phase 1 Deliverables
 
-- [ ] Unity 2022 LTS project created, URP configured
+- [ ] Unity 6 LTS project created, URP configured
 - [ ] `_Project/` folder structure scaffolded
 - [ ] New Input System package installed and configured
 - [ ] `Bootstrap.unity` scene with `ServiceLocator` skeleton

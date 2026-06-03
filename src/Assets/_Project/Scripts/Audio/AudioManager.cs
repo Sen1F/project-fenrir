@@ -31,7 +31,7 @@ namespace Fenrir.Audio
 
         private void Start()
         {
-            var cycle = FindObjectOfType<DayNightCycle>();
+            var cycle = FindFirstObjectByType<DayNightCycle>();
             if (cycle != null) cycle.OnPhaseChanged += OnPhaseChanged;
 
             BehaviorEventBus.Subscribe<BossKilledEvent>(_ => StopCombatMusic());

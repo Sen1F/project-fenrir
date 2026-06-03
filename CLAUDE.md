@@ -6,7 +6,7 @@ Context file for Claude Code. Read this before touching any file in the repo.
 
 ## What this project is
 
-**Project Fenrir** is a semi-open-world action RPG for iOS built in Unity 2022 LTS (URP).
+**Project Fenrir** is a semi-open-world action RPG for iOS built in Unity 6 LTS (URP).
 The core mechanic is a **hidden trait system**: the player's behavior shapes 10 invisible traits which, when thresholds are met, trigger an **evolution** — a permanent, character-defining transformation.
 
 Full design docs are in the repo root:
@@ -28,7 +28,7 @@ Read the relevant doc before changing anything in its domain.
 
 | Layer | Choice |
 | --- | --- |
-| Engine | Unity 2022 LTS + URP |
+| Engine | Unity 6 LTS + URP |
 | Language | C# (.NET Standard 2.1) |
 | Rendering | URP (Universal Render Pipeline) |
 | Input | Unity Input System (Enhanced Touch) |

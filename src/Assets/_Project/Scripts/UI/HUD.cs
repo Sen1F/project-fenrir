@@ -21,7 +21,7 @@ namespace Fenrir.UI
         private void Awake()
         {
             if (_health == null)
-                _health = FindObjectOfType<PlayerHealth>();
+                _health = FindFirstObjectByType<PlayerHealth>();
 
             if (_health != null)
             {

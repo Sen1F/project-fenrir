@@ -15,7 +15,7 @@ namespace Fenrir.Editor
     public static class FenrirSceneFinalize
     {
         [MenuItem("Fenrir/Finalize EmberForest Scene")]
-        public static void Finalize()
+        public static void FinalizeScene()
         {
             const string path = "Assets/_Project/Scenes/EmberForest.unity";
             var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);

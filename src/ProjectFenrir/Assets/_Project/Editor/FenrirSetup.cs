@@ -7,6 +7,7 @@ using UnityEngine.AI;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Rendering;
 
 using Fenrir.Audio;
 using Fenrir.Awakening;
@@ -46,6 +47,9 @@ namespace Fenrir.Editor
         [MenuItem("Fenrir/Setup Project")]
         public static void SetupProject()
         {
+            // ── 0. URP pipeline asset ─────────────────────────────────────────
+            EnsureURPAsset();
+
             // ── 1. Tags ───────────────────────────────────────────────────────
             FenrirEditorUtils.EnsureTag("Player");
             FenrirEditorUtils.EnsureTag("Enemy");
@@ -406,6 +410,31 @@ namespace Fenrir.Editor
             surface.BuildNavMesh();
 
             Debug.Log("[FenrirSetup] ✓ NavMesh baked.");
+        }
+
+        // ── URP pipeline ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Ensures Graphics Settings points to Mobile_RPAsset.
+        /// After a Library wipe the Scriptable Render Pipeline field goes blank;
+        /// this repairs it so the scene renders correctly without manual steps.
+        /// </summary>
+        private static void EnsureURPAsset()
+        {
+            const string AssetPath = "Assets/Settings/Mobile_RPAsset.asset";
+            RenderPipelineAsset rpa = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(AssetPath);
+            if (rpa == null)
+            {
+                Debug.LogWarning($"[FenrirSetup] URP asset not found at {AssetPath} — skipping.");
+                return;
+            }
+
+            if (GraphicsSettings.defaultRenderPipeline == rpa) return;
+
+            GraphicsSettings.defaultRenderPipeline = rpa;
+            EditorUtility.SetDirty(GraphicsSettings.defaultRenderPipeline);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[FenrirSetup] ✓ URP pipeline asset assigned.");
         }
 
         // ── Build Settings ────────────────────────────────────────────────────

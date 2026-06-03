@@ -2,7 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Fenrir.Save;
 using Fenrir.StateMachine;
+using Fenrir.Traits;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Fenrir.Core
 {
@@ -20,6 +22,29 @@ namespace Fenrir.Core
 
         // Debounce: OnApplicationPause + OnApplicationFocus both fire on iOS background
         private bool _savePending;
+
+        // ── Lifecycle ─────────────────────────────────────────────────────────
+
+        private void OnEnable()
+        {
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
+        }
+
+        /// <summary>
+        /// Clear event bus on every scene unload to prevent stale MonoBehaviour
+        /// callbacks from destroyed scene objects firing during the next scene.
+        /// Bootstrap (DontDestroyOnLoad) resubscribes its own handlers after load.
+        /// </summary>
+        private static void OnSceneUnloaded(Scene _)
+        {
+            BehaviorEventBus.Clear();
+            Debug.Log("[GameLoop] BehaviorEventBus cleared on scene unload.");
+        }
 
         // ── Pause / Resume ────────────────────────────────────────────────────
 

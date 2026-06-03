@@ -1,5 +1,8 @@
 using Fenrir.Combat;
+using Fenrir.Config;
+using Fenrir.Core;
 using Fenrir.Entities.Player;
+using Fenrir.Save;
 using UnityEngine;
 
 namespace Fenrir.Entities.Enemies
@@ -23,12 +26,15 @@ namespace Fenrir.Entities.Enemies
             var attack = new AttackData(
                 AttackType.Light,
                 _attackDamage,
-                _base.Element
+                _base.Element          // attacker element = this enemy
             );
 
-            var playerElement = _base.Element; // defender element fetched from player save in PlayerHealth
-            target.GetComponent<PlayerHealth>()
-                  ?.TakeHit(attack, playerElement);
+            // Defender element = player's current element, read from save
+            Element defenderElement = Element.Fire; // fallback if save unavailable
+            if (ServiceLocator.TryGet<ISaveManager>(out ISaveManager save))
+                defenderElement = save.Current.Character.CurrentElement;
+
+            target.GetComponent<PlayerHealth>()?.TakeHit(attack, defenderElement);
         }
     }
 }

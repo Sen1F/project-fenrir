@@ -53,11 +53,11 @@ namespace Fenrir.Combat
 
         public void RecordDodge() => _playerDodgedThisFight = true;
 
-        public void RecordHitTakenNoDodge()
-        {
-            _hitsWithoutDodge++;
-            BehaviorEventBus.Emit(new HitTakenNoDodgeEvent());
-        }
+        /// <summary>
+        /// Called by PlayerHealth after it has already emitted HitTakenNoDodgeEvent.
+        /// CombatContext only updates its internal counter here — does NOT re-emit.
+        /// </summary>
+        public void NotifyHitTaken() => _hitsWithoutDodge++;
 
         // ── Internal ──────────────────────────────────────────────────────────
 

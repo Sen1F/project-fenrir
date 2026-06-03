@@ -9,7 +9,8 @@ namespace Fenrir.Traits
     {
         public Dictionary<TraitKey, float> Traits = new();
         public Dictionary<string, int> SessionEventCounts = new();
-        public DateTime LastUpdated = DateTime.UtcNow;
+        /// <summary>Unix timestamp. JsonUtility cannot serialize System.DateTime.</summary>
+        public long LastUpdatedUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         public static TraitProfile Neutral()
         {

@@ -10,8 +10,11 @@ namespace Fenrir.Combat
     /// </summary>
     public static class AttackResolver
     {
-        private const float SameElementMod     = 0.75f;   // −25%
-        private const float OppositeElementMod = 1.25f;   // +25%
+        // Values from GameConfig — single source of truth
+        // GameConfig.ElementalResistanceMod = -0.25f → multiplier = 1 + (-0.25) = 0.75
+        // GameConfig.ElementalWeaknessMod   = +0.25f → multiplier = 1 + (+0.25) = 1.25
+        private static float SameElementMult     => 1f + GameConfig.ElementalResistanceMod;
+        private static float OppositeElementMult => 1f + GameConfig.ElementalWeaknessMod;
 
         public static float Resolve(AttackData attack, Element defenderElement)
         {
@@ -23,13 +26,9 @@ namespace Fenrir.Combat
                 Element def = defenderElement;
 
                 if (atk == def)
-                {
-                    damage *= SameElementMod;
-                }
+                    damage *= SameElementMult;
                 else if (ElementExtensions.AreOpposites(atk, def))
-                {
-                    damage *= OppositeElementMod;
-                }
+                    damage *= OppositeElementMult;
             }
 
             return Mathf.Max(0f, damage);

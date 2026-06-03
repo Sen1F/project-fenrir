@@ -60,6 +60,8 @@ namespace Fenrir.UI
 
         private void OnDestroy()
         {
+            CancelInvoke(nameof(HideJournalNotification));
+
             if (_health != null)
             {
                 _health.OnDamaged -= UpdateHpBar;

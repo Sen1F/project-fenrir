@@ -1,24 +1,28 @@
+using Fenrir.Core;
 using Fenrir.StateMachine;
 using UnityEngine;
 
 namespace Fenrir.Entities.Player
 {
     /// <summary>
-    /// Owns movement and state machine for the player entity.
+    /// Owns movement for the player entity.
+    /// State transitions route through AppStateMachine (single source of truth).
     /// Receives movement vectors from InputHandler (via TouchMapper).
     /// Camera is handled separately by a CinemachineFreeLook.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour
     {
-        // ── Tunables ──────────────────────────────────────────────────────────
         [SerializeField] private float _moveSpeed   = 5f;
         [SerializeField] private float _dodgeSpeed  = 12f;
-        [SerializeField] private float _rotateSpeed = 720f;  // degrees / second
+        [SerializeField] private float _rotateSpeed = 720f;
         [SerializeField] private float _gravity     = -20f;
 
-        // ── State ─────────────────────────────────────────────────────────────
-        public PlayerState State { get; private set; } = PlayerState.Idle;
+        // Read-only mirror — AppStateMachine is the authoritative source
+        public PlayerState State =>
+            ServiceLocator.TryGet<AppStateMachine>(out AppStateMachine sm)
+                ? sm.PlayerState
+                : PlayerState.Idle;
 
         private CharacterController _cc;
         private Vector3  _moveInput;
@@ -99,15 +103,15 @@ namespace Fenrir.Entities.Player
                 _rotateSpeed * Time.deltaTime);
         }
 
-        // ── State machine ─────────────────────────────────────────────────────
+        // ── State transitions (delegate to AppStateMachine) ───────────────────
 
         public void TransitionTo(PlayerState next)
         {
-            if (State == next) return;
-            State = next;
+            if (ServiceLocator.TryGet<AppStateMachine>(out AppStateMachine sm))
+                sm.TrySetPlayerState(next);
         }
 
-        public void SetDead()   => TransitionTo(PlayerState.Dead);
-        public void SetIdle()   => TransitionTo(PlayerState.Idle);
+        public void SetDead() => TransitionTo(PlayerState.Dead);
+        public void SetIdle() => TransitionTo(PlayerState.Idle);
     }
 }

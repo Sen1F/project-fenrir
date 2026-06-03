@@ -66,7 +66,7 @@ namespace Fenrir.Editor
             // Write serialised fields via SerializedObject (Undo-safe, domain-reload-safe)
             WriteFloat(health, "_maxHealth",   maxHp);
             WriteFloat(combat, "_baseAttack",  atk);
-            WriteFloat(ai,     "_aggroRange",  aggro);
+            WriteFloat(ai,     "_detectionRange", aggro);
             WriteFloat(ai,     "_attackRange", atkRange);
 
             Undo.RegisterCreatedObjectUndo(go, $"Spawn {name}");

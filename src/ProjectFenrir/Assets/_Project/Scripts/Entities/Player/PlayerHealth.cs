@@ -70,7 +70,12 @@ namespace Fenrir.Entities.Player
             else
             {
                 _hitsTakenThisCombat++;
+                // Emit once here. CombatContext.RecordHitTakenNoDodge() must NOT
+                // also call Emit — it only increments its internal counter.
                 BehaviorEventBus.Emit(new HitTakenNoDodgeEvent());
+                // Notify CombatContext for its end-of-combat accounting
+                if (Core.ServiceLocator.TryGet<Combat.CombatContext>(out Combat.CombatContext ctx))
+                    ctx.NotifyHitTaken();
             }
 
             damage = AttackResolver.Resolve(new AttackData(

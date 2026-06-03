@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Fenrir.Combat;
 using Fenrir.Config;
 using Fenrir.Core;
@@ -9,32 +10,33 @@ namespace Fenrir.Entities.Player
 {
     /// <summary>
     /// Owns the player's attack/block/dodge decision logic.
-    /// Produces AttackData structs for AttackResolver.
-    /// Tracks consecutive deaths vs. the same enemy ID for pattern-failure detection.
+    /// Produces AttackData structs, passes to target health, then emits trait events
+    /// ONLY after confirming the hit landed.
+    /// Tracks per-enemy-type consecutive deaths for pattern-failure detection.
     /// </summary>
-    [RequireComponent(typeof(PlayerHealth), typeof(PlayerEnergy),
-                      typeof(PlayerTraitEmitter), typeof(HitStateManager))]
+    [RequireComponent(typeof(PlayerHealth))]
+    [RequireComponent(typeof(PlayerEnergy))]
+    [RequireComponent(typeof(PlayerTraitEmitter))]
+    [RequireComponent(typeof(HitStateManager))]
     public class PlayerCombat : MonoBehaviour
     {
-        // ── Tunables ──────────────────────────────────────────────────────────
-        [SerializeField] private float _lightAttackDamage  = 15f;
-        [SerializeField] private float _heavyAttackDamage  = 35f;
-        [SerializeField] private float _abilityDamage      = 50f;
-        [SerializeField] private float _abilityEnergyCost  = 40f;
+        [SerializeField] private float _lightAttackDamage = 15f;
+        [SerializeField] private float _heavyAttackDamage = 35f;
+        [SerializeField] private float _abilityDamage     = 50f;
+        [SerializeField] private float _abilityEnergyCost = 40f;
 
-        // ── Components ────────────────────────────────────────────────────────
         private PlayerHealth       _health;
         private PlayerEnergy       _energy;
         private PlayerTraitEmitter _emitter;
         private HitStateManager    _hitState;
 
-        // ── Combat state ──────────────────────────────────────────────────────
-        private bool   _usedDodgeThisCombat;
+        // Per-enemy-ID death counts (keyed by EnemyBase.EnemyId)
+        private readonly Dictionary<string, int> _deathsByEnemyId = new();
         private string _currentEnemyId;
-        private int    _consecutiveDeathsVsSameEnemy;
+        private bool   _usedDodgeThisCombat;
 
-        private Element PlayerElement => ServiceLocator.TryGet<ISaveManager>(out var save)
-            ? save.Current.Character.CurrentElement
+        private Element PlayerElement => ServiceLocator.TryGet<ISaveManager>(out ISaveManager s)
+            ? s.Current.Character.CurrentElement
             : Element.Fire;
 
         private void Awake()
@@ -47,28 +49,28 @@ namespace Fenrir.Entities.Player
             _health.OnDied += HandleDeath;
         }
 
-        // ── Input forwarding (called by InputHandler/TouchMapper) ─────────────
+        // ── Input forwarding ──────────────────────────────────────────────────
 
         public void DoLightAttack(GameObject target)
         {
             var attack = new AttackData(AttackType.Light, _lightAttackDamage, PlayerElement);
-            _emitter.OnLightAttackLanded();  // optimistic — real hit detection in AttackResolver
-            TryHitTarget(target, attack);
+            if (TryHitTarget(target, attack))
+                _emitter.OnLightAttackLanded();   // emit ONLY after confirmed hit
         }
 
         public void DoHeavyAttack(GameObject target)
         {
             var attack = new AttackData(AttackType.Heavy, _heavyAttackDamage, PlayerElement);
-            _emitter.OnHeavyAttackLanded();
-            TryHitTarget(target, attack);
+            if (TryHitTarget(target, attack))
+                _emitter.OnHeavyAttackLanded();
         }
 
         public void DoAbility(GameObject target)
         {
             if (!_energy.TrySpend(_abilityEnergyCost)) return;
             var attack = new AttackData(AttackType.Ability, _abilityDamage, PlayerElement, isAbility: true);
-            _emitter.OnAbilityUsed();
-            TryHitTarget(target, attack);
+            if (TryHitTarget(target, attack))
+                _emitter.OnAbilityUsed();
         }
 
         public void DoBlock()  => _hitState.BeginBlock();
@@ -79,13 +81,17 @@ namespace Fenrir.Entities.Player
             _hitState.BeginDodge();
             _usedDodgeThisCombat = true;
             _emitter.OnDodgeUsed();
+
+            // Notify CombatContext so end-of-combat dodge flag is set
+            if (ServiceLocator.TryGet<CombatContext>(out CombatContext ctx))
+                ctx.RecordDodge();
         }
 
         // ── Combat lifecycle ──────────────────────────────────────────────────
 
         public void EnterCombat(string enemyId)
         {
-            _currentEnemyId    = enemyId;
+            _currentEnemyId      = enemyId;
             _usedDodgeThisCombat = false;
             _health.BeginCombat();
         }
@@ -94,38 +100,42 @@ namespace Fenrir.Entities.Player
         {
             _health.EndCombat();
 
-            if (playerWon)
-            {
-                _consecutiveDeathsVsSameEnemy = 0;
+            if (playerWon && !_usedDodgeThisCombat)
+                _emitter.OnCombatCompletedNoDodge();
 
-                if (!_usedDodgeThisCombat)
-                    _emitter.OnCombatCompletedNoDodge();
-            }
+            // Winning any fight resets the pattern-failure counter for that enemy type
+            if (playerWon && _currentEnemyId != null)
+                _deathsByEnemyId[_currentEnemyId] = 0;
         }
 
-        // ── Internal ──────────────────────────────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────────────────────
 
-        private void TryHitTarget(GameObject target, AttackData attack)
+        private bool TryHitTarget(GameObject target, AttackData attack)
         {
-            if (target == null) return;
+            if (target == null) return false;
             var enemyHealth = target.GetComponent<Entities.Enemies.EnemyHealth>();
-            if (enemyHealth != null)
-                enemyHealth.TakeHit(attack, PlayerElement);
+            if (enemyHealth == null) return false;
+
+            enemyHealth.TakeHit(attack, PlayerElement);
+            return true;
         }
 
         private void HandleDeath()
         {
             if (_currentEnemyId != null)
-                _consecutiveDeathsVsSameEnemy++;
-
-            _health.SetConsecutiveDeaths(_consecutiveDeathsVsSameEnemy);
-
-            // Apply currency loss
-            if (ServiceLocator.TryGet<ISaveManager>(out var save))
             {
-                float loss = Random.Range(GameConfig.DeathCurrencyLossMin, GameConfig.DeathCurrencyLossMax);
-                int toRemove = Mathf.FloorToInt(save.Current.Character.Currency * loss);
-                save.Current.Character.Currency = Mathf.Max(0, save.Current.Character.Currency - toRemove);
+                _deathsByEnemyId.TryGetValue(_currentEnemyId, out int prev);
+                _deathsByEnemyId[_currentEnemyId] = prev + 1;
+                // Inject correct consecutive count so PlayerHealth can classify
+                _health.SetConsecutiveDeaths(_deathsByEnemyId[_currentEnemyId]);
+            }
+
+            // Currency loss on death
+            if (ServiceLocator.TryGet<ISaveManager>(out ISaveManager save))
+            {
+                float pct  = Random.Range(GameConfig.DeathCurrencyLossMin, GameConfig.DeathCurrencyLossMax);
+                float loss = save.Current.Character.Currency * pct;
+                save.Current.Character.Currency = Mathf.Max(0f, save.Current.Character.Currency - loss);
                 save.MarkDirty();
             }
         }

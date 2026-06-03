@@ -12,6 +12,7 @@ namespace Fenrir.Audio
         private Coroutine _fadeCoroutine;
 
         private void Reset() => _source = GetComponent<AudioSource>();
+        private void Awake()  { if (_source == null) _source = GetComponent<AudioSource>(); }
 
         public void CrossFade(AudioClip clip, float duration)
         {

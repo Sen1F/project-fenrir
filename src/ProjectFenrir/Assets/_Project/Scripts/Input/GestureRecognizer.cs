@@ -25,6 +25,11 @@ namespace Fenrir.Input
         private int     _rightFingerId = -1;
         private bool    _rightActive;
 
+        private void Awake()
+        {
+            if (_mapper == null) _mapper = GetComponent<TouchMapper>();
+        }
+
         private void OnEnable()  => EnhancedTouchSupport.Enable();
         private void OnDisable() => EnhancedTouchSupport.Disable();
 

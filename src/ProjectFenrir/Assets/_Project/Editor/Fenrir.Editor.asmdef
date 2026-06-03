@@ -2,7 +2,9 @@
     "name": "Fenrir.Editor",
     "rootNamespace": "Fenrir.Editor",
     "references": [
-        "Fenrir.Runtime"
+        "Fenrir.Runtime",
+        "Unity.Cinemachine",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

@@ -4,51 +4,57 @@ using UnityEngine.InputSystem;
 namespace Fenrir.Input
 {
     /// <summary>
-    /// Raw input layer. Reads Unity's new Input System touch/gamepad events
-    /// and forwards normalised values to GestureRecognizer and TouchMapper.
-    /// This class knows nothing about game entities.
+    /// Raw input layer using Unity Input System (new).
+    /// Forwards to GestureRecognizer (touch) or processes keyboard directly (Editor).
     /// </summary>
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private GestureRecognizer _gesture;
         [SerializeField] private TouchMapper       _mapper;
 
+        private void Awake()
+        {
+            // Auto-find on same GameObject if not wired via Inspector
+            if (_gesture == null) _gesture = GetComponent<GestureRecognizer>();
+            if (_mapper  == null) _mapper  = GetComponent<TouchMapper>();
+        }
+
         private void Update()
         {
+            if (_mapper == null) return;
+            if (Keyboard.current == null) return;
+
 #if UNITY_IOS || UNITY_ANDROID
             ProcessTouches();
 #else
-            ProcessKeyboard();  // Editor / Mac fallback
+            ProcessKeyboard();
 #endif
         }
 
-        // ── Mobile ────────────────────────────────────────────────────────────
-
         private void ProcessTouches()
         {
-            // Unity's new input system touch processing is deferred to
-            // GestureRecognizer, which owns the left/right split logic.
-            _gesture.Tick();
+            _gesture?.Tick();
         }
-
-        // ── Editor / Keyboard ─────────────────────────────────────────────────
 
         private void ProcessKeyboard()
         {
+            var kb = Keyboard.current;
+
             float h = 0f, v = 0f;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) h =  1f;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)  h = -1f;
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)    v =  1f;
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)  v = -1f;
+            if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) h =  1f;
+            if (kb.aKey.isPressed || kb.leftArrowKey.isPressed)  h = -1f;
+            if (kb.wKey.isPressed || kb.upArrowKey.isPressed)    v =  1f;
+            if (kb.sKey.isPressed || kb.downArrowKey.isPressed)  v = -1f;
 
             _mapper.OnMoveInput(new Vector2(h, v));
 
-            if (Keyboard.current.spaceKey.wasPressedThisFrame) _mapper.OnDodge();
-            if (Keyboard.current.jKey.wasPressedThisFrame)     _mapper.OnLightAttack();
-            if (Keyboard.current.kKey.wasPressedThisFrame)     _mapper.OnHeavyAttack();
-            if (Keyboard.current.lKey.wasPressedThisFrame)     _mapper.OnAbility();
-            if (Keyboard.current.bKey.isPressed)               _mapper.OnBlockHeld();
-            else                                               _mapper.OnBlockReleased();
+            if (kb.spaceKey.wasPressedThisFrame) _mapper.OnDodge();
+            if (kb.jKey.wasPressedThisFrame)     _mapper.OnLightAttack();
+            if (kb.kKey.wasPressedThisFrame)     _mapper.OnHeavyAttack();
+            if (kb.lKey.wasPressedThisFrame)     _mapper.OnAbility();
+
+            if (kb.bKey.isPressed) _mapper.OnBlockHeld();
+            else                   _mapper.OnBlockReleased();
         }
     }
 }

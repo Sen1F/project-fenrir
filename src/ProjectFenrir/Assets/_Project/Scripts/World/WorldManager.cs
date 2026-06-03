@@ -20,6 +20,7 @@ namespace Fenrir.World
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            if (_dayNight == null) _dayNight = FindAnyObjectByType<DayNightCycle>();
         }
 
         private void Start()

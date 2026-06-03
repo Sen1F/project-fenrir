@@ -143,7 +143,9 @@ namespace Fenrir.Editor
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            // Use new Input System module — StandaloneInputModule causes errors when
+            // Active Input Handling is set to "Input System Package (New)"
+            es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
         }
 
         private static GameObject CreateUIPanel(string name, Transform parent)

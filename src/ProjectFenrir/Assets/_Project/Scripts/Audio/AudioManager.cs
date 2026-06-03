@@ -27,6 +27,8 @@ namespace Fenrir.Audio
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            if (_musicLayer == null) _musicLayer = GetComponent<MusicLayer>();
+            if (_sfxPool    == null) _sfxPool    = GetComponent<SFXPool>();
         }
 
         private void Start()

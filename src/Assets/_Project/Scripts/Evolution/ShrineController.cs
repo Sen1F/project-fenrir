@@ -98,6 +98,11 @@ namespace Fenrir.Evolution
         public void TryInteract()
         {
             if (!_playerInRange || State != ShrineState.Active) return;
+
+            // Persist shrine activation to save before starting the sequence
+            if (Core.ServiceLocator.TryGet<World.WorldManager>(out World.WorldManager wm))
+                wm.MarkShrineActivated(_shrineId);
+
             _sequencer?.Begin();
         }
     }

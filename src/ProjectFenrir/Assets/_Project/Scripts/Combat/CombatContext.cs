@@ -35,7 +35,7 @@ namespace Fenrir.Combat
         {
             int count = 0;
             foreach (Entities.Enemies.EnemyAI ai in
-                     FindObjectsByType<Entities.Enemies.EnemyAI>(FindObjectsSortMode.None))
+                     FindObjectsByType<Entities.Enemies.EnemyAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             {
                 if (ai.IsAwareOfPlayer) count++;
             }

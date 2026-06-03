@@ -8,5 +8,6 @@ namespace Fenrir.Save
         Task SaveAsync();
         Task<bool> LoadAsync();
         void MarkDirty();           // flags that a save is needed on next checkpoint
+        bool IsDirty { get; }       // true when unsaved changes exist
     }
 }

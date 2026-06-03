@@ -46,10 +46,14 @@ namespace Fenrir.Editor
         [MenuItem("Fenrir/Setup Project")]
         public static void SetupProject()
         {
-            // ── 1. Tags ───────────────────────────────────────────────────────
+            // ── 1. Tags & Layers ─────────────────────────────────────────────
             FenrirEditorUtils.EnsureTag("Player");
             FenrirEditorUtils.EnsureTag("Enemy");
             FenrirEditorUtils.EnsureTag("GameController");
+            FenrirEditorUtils.EnsureLayer("Player");
+            FenrirEditorUtils.EnsureLayer("Enemy");
+            // Player and Enemy layers do not collide — NavMeshAgent must not push CharacterController
+            FenrirEditorUtils.SetLayerCollision("Player", "Enemy", ignore: true);
 
             // ── 2. Bootstrap ──────────────────────────────────────────────────
             SetupBootstrap();
@@ -162,6 +166,8 @@ namespace Fenrir.Editor
         {
             GameObject p = GetOrCreate("Player");
             p.tag = "Player";
+            int playerLayer = LayerMask.NameToLayer("Player");
+            if (playerLayer >= 0) p.layer = playerLayer;
             EnsureComponent<CharacterController>(p);
             EnsureComponent<PlayerController>(p);
             EnsureComponent<PlayerHealth>(p);
@@ -347,15 +353,21 @@ namespace Fenrir.Editor
 
         private static void SpawnAshWolf()
         {
-            // Skip if already spawned
-            if (GameObject.Find("AshWolf") != null) return;
-
             FenrirEditorUtils.EnsureTag("Enemy");
+
+            // Always destroy and recreate so position/stats stay in sync with this script
+            GameObject existing = GameObject.Find("AshWolf");
+            if (existing != null)
+                Object.DestroyImmediate(existing);
 
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             go.name = "AshWolf";
             go.tag  = "Enemy";
             go.transform.position = new Vector3(0f, 0.1f, 14f);  // 14 units away — outside 8f detection range
+
+            // Enemy layer — prevents CapsuleCollider from physically pushing player's CharacterController
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0) go.layer = enemyLayer;
 
             Shader urpLit = Shader.Find("Universal Render Pipeline/Lit");
             if (urpLit != null)
@@ -369,11 +381,6 @@ namespace Fenrir.Editor
             agent.stoppingDistance = 1.4f;
             agent.radius           = 0.4f;
             agent.height           = 2f;
-            agent.avoidancePriority = 50;
-            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
-            // Prevent the NavMeshAgent from physically pushing the player's CharacterController
-            agent.updatePosition   = true;
-            agent.updateRotation   = true;
 
             Fenrir.Entities.Enemies.EnemyHealth  health  = go.AddComponent<Fenrir.Entities.Enemies.EnemyHealth>();
             Fenrir.Entities.Enemies.EnemyCombat  combat  = go.AddComponent<Fenrir.Entities.Enemies.EnemyCombat>();
@@ -386,7 +393,7 @@ namespace Fenrir.Editor
             WriteFloat(ai,     "_detectionRange", 8f);
             WriteFloat(ai,     "_attackRange",    1.8f);
 
-            Debug.Log("[FenrirSetup] ✓ Ash Wolf spawned.");
+            Debug.Log("[FenrirSetup] ✓ Ash Wolf spawned at (0, 14).");
         }
 
         // ── NavMesh ───────────────────────────────────────────────────────────

@@ -31,5 +31,58 @@ namespace Fenrir.Editor
 
             Debug.Log($"[FenrirEditor] Registered tag '{tag}' in TagManager.");
         }
+
+        /// <summary>
+        /// Adds a user layer to TagManager.asset if not already present.
+        /// Unity has 32 layers; user layers start at index 8.
+        /// </summary>
+        internal static void EnsureLayer(string layerName)
+        {
+            SerializedObject tagManager = new SerializedObject(
+                AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+
+            // User layers are stored as "User Layer 8" … "User Layer 31"
+            for (int i = 8; i <= 31; i++)
+            {
+                SerializedProperty sp = tagManager.FindProperty($"layers.Array.data[{i}]");
+                if (sp == null) continue;
+                if (sp.stringValue == layerName) return;           // already exists
+            }
+
+            // Find first empty slot
+            for (int i = 8; i <= 31; i++)
+            {
+                SerializedProperty sp = tagManager.FindProperty($"layers.Array.data[{i}]");
+                if (sp == null) continue;
+                if (string.IsNullOrEmpty(sp.stringValue))
+                {
+                    sp.stringValue = layerName;
+                    tagManager.ApplyModifiedProperties();
+                    Debug.Log($"[FenrirEditor] Registered layer '{layerName}' at index {i}.");
+                    return;
+                }
+            }
+
+            Debug.LogWarning($"[FenrirEditor] No free layer slot for '{layerName}' — all 32 layers in use.");
+        }
+
+        /// <summary>
+        /// Sets whether two named layers ignore each other in the Physics collision matrix.
+        /// Call after EnsureLayer so both layers are registered before reading their indices.
+        /// </summary>
+        internal static void SetLayerCollision(string layerA, string layerB, bool ignore)
+        {
+            int a = LayerMask.NameToLayer(layerA);
+            int b = LayerMask.NameToLayer(layerB);
+
+            if (a < 0 || b < 0)
+            {
+                Debug.LogWarning($"[FenrirEditor] SetLayerCollision: layer '{layerA}' or '{layerB}' not found. Run EnsureLayer first.");
+                return;
+            }
+
+            Physics.IgnoreLayerCollision(a, b, ignore);
+            Debug.Log($"[FenrirEditor] Layer collision {layerA}↔{layerB} ignore={ignore}.");
+        }
     }
 }

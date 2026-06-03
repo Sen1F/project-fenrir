@@ -10,7 +10,7 @@ namespace Fenrir.StateMachine
         Staggered,
         Dead,
         Interacting,
-        InDialogue,
+        InCutscene,     // locked during cutscene / dialogue / evolution
         InEvolution,
     }
 }

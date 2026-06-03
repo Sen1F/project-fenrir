@@ -1,15 +1,15 @@
+using System;
+using System.Threading.Tasks;
 using Fenrir.Save;
 using Fenrir.StateMachine;
-using Fenrir.Traits;
 using UnityEngine;
 
 namespace Fenrir.Core
 {
     /// <summary>
     /// Drives the top-level game loop:
-    ///   - Pause / resume (sets Time.timeScale)
-    ///   - Application focus / pause → auto-save
-    ///   - Scene unload → BehaviorEventBus.Clear()
+    ///   - Pause / resume (Time.timeScale + SceneRouter state)
+    ///   - Application focus / pause → debounced auto-save on background
     ///
     /// Attach to the Bootstrap GameObject (DontDestroyOnLoad).
     /// Registered with ServiceLocator in Bootstrap.
@@ -18,6 +18,9 @@ namespace Fenrir.Core
     {
         public bool IsPaused { get; private set; }
 
+        // Debounce: OnApplicationPause + OnApplicationFocus both fire on iOS background
+        private bool _savePending;
+
         // ── Pause / Resume ────────────────────────────────────────────────────
 
         public void Pause()
@@ -25,7 +28,8 @@ namespace Fenrir.Core
             if (IsPaused) return;
             IsPaused       = true;
             Time.timeScale = 0f;
-            SceneRouter.OnAppStateChanged?.Invoke(AppState.Paused);
+            // Use the router's internal setter so CurrentAppState stays accurate
+            SceneRouter.SetPaused(true);
             Debug.Log("[GameLoop] Paused");
         }
 
@@ -34,7 +38,7 @@ namespace Fenrir.Core
             if (!IsPaused) return;
             IsPaused       = false;
             Time.timeScale = 1f;
-            SceneRouter.OnAppStateChanged?.Invoke(AppState.InGame);
+            SceneRouter.SetPaused(false);
             Debug.Log("[GameLoop] Resumed");
         }
 
@@ -47,36 +51,45 @@ namespace Fenrir.Core
 
         private void OnApplicationPause(bool paused)
         {
-            if (paused) SaveAndClearBus();
+            if (paused) RequestSave();
         }
 
         private void OnApplicationFocus(bool focused)
         {
-            if (!focused) SaveAndClearBus();
+            if (!focused) RequestSave();
         }
 
         private void OnApplicationQuit()
         {
-            SaveAndClearBus();
+            // Synchronous path on quit — fire-and-forget with error logging
+            _ = TrySaveAsync();
         }
 
-        // ── Scene unload ──────────────────────────────────────────────────────
+        // ── Debounced save ────────────────────────────────────────────────────
 
-        private void OnDestroy()
+        private void RequestSave()
         {
-            // Only clear bus when the Bootstrap object itself is destroyed
-            // (i.e. the full session is ending — not mid-game scene transitions).
+            if (_savePending) return; // de-duplicate the double-fire on iOS background
+            _savePending = true;
+            _ = TrySaveAsync();
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
-
-        private static async void SaveAndClearBus()
+        private async Task TrySaveAsync()
         {
-            if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
-            if (save.IsDirty)
+            try
             {
+                if (!ServiceLocator.TryGet<ISaveManager>(out ISaveManager save)) return;
+                if (!save.IsDirty) return;
                 await save.SaveAsync();
-                Debug.Log("[GameLoop] Auto-saved on pause/quit.");
+                Debug.Log("[GameLoop] Auto-saved.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[GameLoop] Auto-save failed: {ex.Message}");
+            }
+            finally
+            {
+                _savePending = false;
             }
         }
     }

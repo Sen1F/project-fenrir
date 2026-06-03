@@ -68,7 +68,7 @@ namespace Fenrir.StateMachine
 
         public bool CanPlayerAct()
         {
-            return GameState == GameState.Exploration || GameState == GameState.Combat
+            return (GameState == GameState.Exploration || GameState == GameState.Combat)
                    && PlayerState is PlayerState.Idle or PlayerState.Moving;
         }
 
@@ -103,7 +103,7 @@ namespace Fenrir.StateMachine
         {
             // When a cutscene or dialogue starts, lock the player
             if (state is GameState.Cutscene or GameState.Dialogue or GameState.Evolution)
-                TrySetPlayerState(PlayerState.InDialogue);
+                TrySetPlayerState(PlayerState.InCutscene);
             else if (state == GameState.Exploration)
                 TrySetPlayerState(PlayerState.Idle);
         }

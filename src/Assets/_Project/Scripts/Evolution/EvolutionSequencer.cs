@@ -91,7 +91,7 @@ namespace Fenrir.Evolution
         private static void SetInputEnabled(bool enabled)
         {
             // Disable/enable via TouchMapper found in scene
-            var mapper = FindFirstObjectByType<Input.TouchMapper>();
+            var mapper = FindAnyObjectByType<Input.TouchMapper>();
             if (mapper != null) mapper.enabled = enabled;
         }
     }

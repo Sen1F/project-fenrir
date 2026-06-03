@@ -19,7 +19,7 @@ namespace Fenrir.Combat
 
         private void Awake()
         {
-            _playerCombat = FindFirstObjectByType<PlayerCombat>();
+            _playerCombat = FindAnyObjectByType<PlayerCombat>();
         }
 
         /// <summary>

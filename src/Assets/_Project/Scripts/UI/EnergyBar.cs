@@ -22,7 +22,7 @@ namespace Fenrir.UI
         private void Awake()
         {
             if (_energy == null)
-                _energy = FindFirstObjectByType<PlayerEnergy>();
+                _energy = FindAnyObjectByType<PlayerEnergy>();
 
             if (_energy != null)
                 _energy.OnEnergyChanged += Refresh;

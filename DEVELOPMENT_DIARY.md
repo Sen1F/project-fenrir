@@ -153,31 +153,60 @@ Main Camera
 ```text
 ---
 
+## Session 4 — First Playable Milestone
+**Date:** 2026-06-02
+
+### What we did
+
+Got the game to a playable state in the Editor for the first time.
+
+**Scene work:**
+- Wrote three editor utilities: `FenrirSceneSetup`, `FenrirSceneFinalize`, `FenrirWireReferences` — idempotent scene scaffolding scripts runnable from the Fenrir menu
+- `FenrirSceneFinalize` handles: ground plane (200×200 units), player capsule mesh, Cinemachine camera with OrbitalFollow + RotationComposer, EventSystem fix, Player tag, SceneValidator attachment
+- Added `SceneValidator.cs` — runs on Start in dev builds, logs clear errors for every missing critical component instead of crashing with NullRefs
+
+**Compile fixes (6 total):**
+- `SaveData`: `string[]` → `List<string>` for `.Add()` / `.Contains()` compatibility
+- `Bootstrap`: missing `using Fenrir.Config`
+- `PlayerCombat`: `[RequireComponent]` multi-type attribute split
+- `SFXPool`: null prefab crash — now self-creates an AudioSource template if none assigned
+- `MusicLayer`: `Reset()` only fires in Editor — added `Awake()` fallback for runtime
+- All `FindFirstObjectByType` → `FindAnyObjectByType` (Unity 6 deprecation)
+
+**Robustness pass:** Added `Awake()` auto-find fallbacks to `InputHandler`, `TouchMapper`, `GestureRecognizer`, `WorldManager`, `AudioManager` — eliminates NullRefs when serialized refs fail to persist across editor script runs.
+
+**Input System:** Set Active Input Handling to `Input System Package (New)` in Project Settings. Replaced `StandaloneInputModule` with `InputSystemUIInputModule` on EventSystem.
+
+**Packages added:** Cinemachine 3.1.4, TextMeshPro 3.2.0-pre.10, Burst 1.8.18 (pinned — Unity 6 template ships with a broken Burst version).
+
+**Git:** Working on branch `chore/repo-setup`. Push with `git push origin chore/repo-setup`.
+
+**Result:** Player capsule visible, WASD movement working, Cinemachine camera follows player, `SceneValidator` confirms all critical refs found, 0 compile errors.
+
+---
+
 ## Current Status
 
-**Phase 1 — Foundation:** ~90% complete
+**Phase 1 — Foundation:** ✅ Complete
 
 ### Done ✅
-
 - Full design layer (all docs, all decisions locked)
-- Full C# scaffold (56 files, 12 modules)
-- Unity project created, packages installed, scripts compiling clean
-- 3 scenes created and added to Build Settings
-- Unit test framework wired up
+- Full C# scaffold (61 files across 13 modules)
+- Unity 6 LTS project, packages, assembly definitions
+- 3 scenes in Build Settings (Bootstrap, Awakening, EmberForest)
+- First playable — movement + camera working
+- SceneValidator runtime guard
+- Unit test framework wired (5 test files)
+- CLAUDE.md for Claude Code CLI context
 
-### In Progress 🔄
+### Phase 2 — Next Steps (priority order)
 
-- Inspector references need wiring (Fenrir → Wire Scene References)
-
-### Next Steps
-
-1. Run **Fenrir → Wire Scene References** — assigns all serialized field references in EmberForest
-2. Add player mesh / capsule placeholder so character is visible
-3. Configure Cinemachine FreeLook camera on Player
-4. Bake NavMesh in EmberForest
-5. First playtest — player should move with keyboard (WASD), combat with J/K/L keys
-6. Switch to iOS build target, test on device
-7. Phase 2: load configs from StreamingAssets at runtime (currently using C# defaults)
+1. **Run unit tests** — Window → Test Runner → EditMode → Run All (expect all green)
+2. **Trait system smoke test** — add a `TraitDebugHUD` that shows live trait values in play mode; verify `DodgeUsedEvent` fires and `Patience` increases on Space key
+3. **Spawn dummy enemy** — place an `EnemyBase` capsule in EmberForest, verify J-key attack reduces its HP and `LightAttackLandedEvent` fires
+4. **Save round-trip** — play, move, quit, reopen scene, verify position/state restored
+5. **iOS build target** — switch platform, set Bundle ID to `com.fenrir.game`, test on device
+6. **Phase 2 proper** — load `TraitWeights.json` and `EvolutionSignatures.json` from StreamingAssets at runtime (currently using C# defaults); wire `EvolutionChecker` to shrine trigger
 
 ---
 

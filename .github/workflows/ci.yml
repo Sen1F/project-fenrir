@@ -2,48 +2,71 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feature/**", "fix/**", "chore/**"]
   pull_request:
     branches: [main, develop]
 
 jobs:
-  # ── Phase 0: docs validation ──────────────────────────────────────────────
-  docs:
-    name: Lint Markdown
+  # ── Markdown lint ────────────────────────────────────────────────────────────
+  lint-docs:
+    name: Lint docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g markdownlint-cli
+      - run: markdownlint "**/*.md" --ignore node_modules
 
-      - name: Install markdownlint-cli
-        run: npm install -g markdownlint-cli
+  # ── Unity build + EditMode tests ─────────────────────────────────────────────
+  unity-build:
+    name: Unity build & tests (Unity 6 LTS)
+    runs-on: ubuntu-latest
+    needs: lint-docs
 
-      - name: Lint docs
-        run: markdownlint "**/*.md" --ignore node_modules
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
 
-  # ── Phase 1+: Swift / Xcode build ─────────────────────────────────────────
-  # Uncomment when the Xcode project lands in /src
-  #
-  # swift:
-  #   name: Build & Test (iOS)
-  #   runs-on: macos-14          # Xcode 15
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Select Xcode
-  #       run: sudo xcode-select -s /Applications/Xcode_15.4.app
-  #
-  #     - name: Build
-  #       run: |
-  #         xcodebuild build-for-testing \
-  #           -project src/Fenrir.xcodeproj \
-  #           -scheme Fenrir \
-  #           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
-  #           CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
-  #
-  #     - name: Test
-  #       run: |
-  #         xcodebuild test \
-  #           -project src/Fenrir.xcodeproj \
-  #           -scheme Fenrir \
-  #           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
-  #           CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: src/ProjectFenrir/Library
+          key: ${{ runner.os }}-unity-library-${{ hashFiles('src/ProjectFenrir/Packages/packages-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-unity-library-
+
+      - name: Activate & build
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE:     ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:       ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD:    ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath:       src/ProjectFenrir
+          unityVersion:      6000.0.40f1
+          targetPlatform:    iOS
+          buildName:         ProjectFenrir
+          buildsPath:        build
+
+      - name: Run EditMode tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE:     ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:       ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD:    ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath:       src/ProjectFenrir
+          unityVersion:      6000.0.40f1
+          testMode:          editmode
+          artifactsPath:     test-results
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results
+          retention-days: 14

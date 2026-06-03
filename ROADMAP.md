@@ -11,23 +11,24 @@
 - [x] World Design — Ember Forest (sub-zones, shrines, NPCs)
 - [x] All design questions closed
 
-## Phase 1 — Repo / Foundation 🔄 IN PROGRESS
+## Phase 1 — Repo / Foundation ✅ COMPLETE
 
 **Engine:** Unity 6 LTS | **Language:** C# | **Pipeline:** URP
 
-- [ ] Unity project created, URP configured
-- [ ] New Input System installed
+- [x] Unity 6 LTS project created, URP (Mobile renderer) configured
+- [x] New Input System installed and set as active input handler
 - [x] `_Project/` folder structure scaffolded
 - [x] Bootstrap scene + ServiceLocator skeleton
 - [x] `TraitProfile.cs` + `BehaviorEvent.cs` data models
-- [x] `BehaviorEventBus.cs`
+- [x] `BehaviorEventBus.cs` (with Unsubscribe support)
 - [x] `KeychainBridge.cs` + `KeychainPlugin.swift` stub
 - [x] `iCloudPlugin.swift` stub
-- [x] `TraitWeights.json` + `EvolutionSignatures.json` + `EnemyDefinitions.json` config placeholders
-- [x] `AudioManager.cs` + `MusicLayer.cs` + `SFXPool.cs` stubs
-- [x] EditMode unit tests (TraitAccumulator, EvolutionChecker, ElementDistribution, TraitProfile)
-- [ ] iOS build target configured (bundle ID, signing)
-- [ ] CI: build validation on push to `develop`
+- [x] `TraitWeights.json` + `EvolutionSignatures.json` + `EnemyDefinitions.json`
+- [x] `AudioManager.cs` + `MusicLayer.cs` + `SFXPool.cs`
+- [x] EditMode unit tests — 27 tests, 5 suites, all passing
+- [x] iOS bundle ID set: `com.fenrir.projectfenrir`
+- [x] CI: GitHub Actions — lint-docs + unity-build + editmode tests
+- [x] First playable: player movement, Cinemachine camera, EmberForest scene wired
 
 ## Phase 2 — Architecture
 

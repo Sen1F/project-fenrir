@@ -12,9 +12,19 @@ namespace Fenrir.Audio
 
         private void Awake()
         {
+            // If no prefab assigned, create a minimal AudioSource as the pool template
+            if (_prefab == null)
+            {
+                var go = new GameObject("SFX_Template");
+                go.transform.SetParent(transform);
+                _prefab = go.AddComponent<AudioSource>();
+                _prefab.playOnAwake = false;
+            }
+
             for (int i = 0; i < _poolSize; i++)
             {
                 AudioSource source = Instantiate(_prefab, transform);
+                source.playOnAwake = false;
                 source.gameObject.SetActive(false);
                 _pool.Enqueue(source);
             }

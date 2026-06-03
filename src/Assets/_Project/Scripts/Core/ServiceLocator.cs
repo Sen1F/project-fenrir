@@ -41,6 +41,9 @@ namespace Fenrir.Core
             return false;
         }
 
+        public static void Unregister<T>() where T : class =>
+            _services.Remove(typeof(T));
+
         /// <summary>Call in tests or on full app reset.</summary>
         public static void Clear() => _services.Clear();
     }

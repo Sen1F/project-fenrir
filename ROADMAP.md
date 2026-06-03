@@ -30,19 +30,29 @@
 - [x] CI: GitHub Actions — lint-docs + unity-build + editmode tests
 - [x] First playable: player movement, Cinemachine camera, EmberForest scene wired
 
-## Phase 2 — Architecture
+## Phase 2 — Architecture 🔄 IN PROGRESS
 
-- [ ] GameLoop, StateMachine, SceneRouter
-- [ ] PlayerController (movement, camera)
-- [ ] InputHandler (joystick + swipe mapping)
-- [ ] EnemyBase + EnemyAI state machine
-- [ ] CombatSystem (attack resolver, hit states, energy)
-- [ ] TraitAccumulator + EvolutionChecker
-- [ ] ShrineController
-- [ ] DayNightCycle
-- [ ] SaveManager (JSON + Keychain layers)
-- [ ] AudioManager skeleton
-- [ ] HUD skeleton (energy bar, health)
+- [x] `SceneRouter` — async typed scene loading, App/GameState events
+- [x] `AppStateMachine` — PlayerState transitions, valid-transition table
+- [x] `GameLoop` — pause/resume, auto-save on app background/quit
+- [x] `Bootstrap` — StreamingAssets JSON config loading, SceneRouter routing
+- [x] `CombatContext` — active encounter tracking, trait events on combat end
+- [x] `ServiceLocator.Unregister<T>()` added
+- [x] PlayerController (movement, Cinemachine camera) — first playable ✅
+- [x] InputHandler + GestureRecognizer + TouchMapper wired
+- [x] EnemyBase + EnemyAI (NavMesh) — code complete, editor spawn script done
+- [x] CombatSystem + AttackResolver + HitStateManager — code complete
+- [x] TraitAccumulator + EvolutionChecker — code complete + unit tested
+- [x] ShrineController — code complete
+- [x] DayNightCycle — in EmberForest scene
+- [x] SaveManager (JSON) — code complete + unit tested
+- [x] AudioManager + MusicLayer + SFXPool — wired to DayNightCycle
+- [x] HUD — EnergyBar + health bar code complete
+- [ ] NavMesh baked in EmberForest
+- [ ] First enemy alive in Play mode (Ash Wolf patrol + chase)
+- [ ] Trait events firing live (dodge → Patience ↑ confirmed in logs)
+- [ ] Save/Load round-trip verified in Play mode
+- [ ] Bootstrap scene fully wired in Unity Inspector
 
 ## Phase 3 — MVP Gameplay
 

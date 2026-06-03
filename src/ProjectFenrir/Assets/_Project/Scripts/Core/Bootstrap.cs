@@ -1,132 +1,166 @@
+using System.IO;
 using System.Threading.Tasks;
 using Fenrir.Analytics;
 using Fenrir.Awakening;
 using Fenrir.Config;
-using Fenrir.Core;
 using Fenrir.Evolution;
 using Fenrir.Save;
+using Fenrir.StateMachine;
 using Fenrir.Traits;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Fenrir.Core
 {
     /// <summary>
-    /// Scene index 0. Bootstraps all services and routes to the correct first scene.
-    /// Marked DontDestroyOnLoad — never unloaded during a session.
+    /// Scene index 0. Bootstraps all services, loads configs from StreamingAssets,
+    /// then routes to the correct first scene via SceneRouter.
+    /// Marked DontDestroyOnLoad — lives for the entire session.
     /// </summary>
+    [RequireComponent(typeof(AppStateMachine))]
+    [RequireComponent(typeof(GameLoop))]
     public class Bootstrap : MonoBehaviour
     {
-        [SerializeField] private string _mainMenuScene    = "MainMenu";
-        [SerializeField] private string _awakeningScene   = "Awakening";
-        [SerializeField] private string _gameScene        = "EmberForest";
-
         private async void Start()
         {
             DontDestroyOnLoad(gameObject);
             RegisterServices();
             await LoadSaveData();
-            RouteToInitialScene();
+            await RouteToInitialSceneAsync();
         }
+
+        // ── Service registration ──────────────────────────────────────────────
 
         private void RegisterServices()
         {
+            // Core loop
+            ServiceLocator.Register<AppStateMachine>(GetComponent<AppStateMachine>());
+            ServiceLocator.Register<GameLoop>(GetComponent<GameLoop>());
+
             // Save
-            var saveManager = new SaveManager();
-            ServiceLocator.Register<ISaveManager>(saveManager);
+            ServiceLocator.Register<ISaveManager>(new SaveManager());
 
             // Awakening
             ServiceLocator.Register<ElementSeedService>(new ElementSeedService());
 
-            // Load configs from StreamingAssets at runtime
-            // (Full implementation in Phase 2 — stubs for now)
-            var evolutionConfig  = new EvolutionSignaturesConfig();
-            var traitWeights     = new TraitWeightsConfig();
+            // Config — load JSON from StreamingAssets; fall back to C# defaults
+            TraitWeightsConfig      traitWeights    = LoadConfig<TraitWeightsConfig>("TraitWeights.json")
+                                                      ?? new TraitWeightsConfig();
+            EvolutionSignaturesConfig evolutionConfig = LoadConfig<EvolutionSignaturesConfig>("EvolutionSignatures.json")
+                                                      ?? new EvolutionSignaturesConfig();
 
-            // Evolution
-            var evolutionChecker = new EvolutionChecker(evolutionConfig);
-            ServiceLocator.Register<IEvolutionChecker>(evolutionChecker);
-
-            // Traits — profile comes from save; accumulator wired after load
             ServiceLocator.Register<TraitWeightsConfig>(traitWeights);
 
+            // Evolution
+            ServiceLocator.Register<IEvolutionChecker>(new EvolutionChecker(evolutionConfig));
+
             // Analytics
-            var logger = new EventLogger(verbose: Debug.isDebugBuild);
-            ServiceLocator.Register<EventLogger>(logger);
+            ServiceLocator.Register<EventLogger>(new EventLogger(verbose: Debug.isDebugBuild));
 
             Debug.Log("[Bootstrap] Services registered.");
         }
+
+        // ── Save loading ──────────────────────────────────────────────────────
 
         private async Task LoadSaveData()
         {
             ISaveManager save = ServiceLocator.Get<ISaveManager>();
             bool loaded = await save.LoadAsync();
 
+            // Wire accumulator only when there is a save to load from.
+            // New players get their accumulator created after Awakening.
             if (loaded)
-            {
-                // Wire TraitAccumulator to the loaded profile
-                var accumulator = new TraitAccumulator(
-                    save.Current.Character.Traits,
-                    ServiceLocator.Get<TraitWeightsConfig>(),
-                    ServiceLocator.Get<IEvolutionChecker>()
-                );
-                ServiceLocator.Register<ITraitAccumulator>(accumulator);
-
-                // Subscribe accumulator to each concrete event type.
-                // (Bus is keyed by concrete type — base-type subscription doesn't propagate.)
-                BehaviorEventBus.Subscribe<DodgeUsedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CounterLandedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<PerfectBlockEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<BlockUsedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<HeavyAttackLandedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<LightAttackLandedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<AbilityUsedFullEnergyEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<AbilityUsedLowEnergyEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CombatCompletedNoDodgeEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<HitTakenNoDodgeEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DeathRecklessEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DeathSacrificeEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DeathOverwhelmedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DeathPatternFailEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DeathAmbushEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CreatureSparedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CreatureHuntedRepeatEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DialogueMercyEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DialoguePunishmentEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<NpcHelpedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<NpcIgnoredEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<LoreObjectReadEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<SecretAreaDiscoveredEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<OriginVillageReturnEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<AreaRevisitedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<QuestCompletedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<OffensiveUpgradePurchasedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<DefensiveUpgradePurchasedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<KnowledgeItemPurchasedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CurrencyHoardedEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<CurrencySpentImmediatelyEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<ExtendedDangerZoneEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<ExtendedSafeZoneEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<AllSecretsFoundEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<NightExplorationEvent>(accumulator.Process);
-                BehaviorEventBus.Subscribe<BossKilledEvent>(accumulator.Process);
-            }
+                WireTraitAccumulator(save.Current.Character.Traits);
 
             Debug.Log($"[Bootstrap] Save loaded: {loaded}");
         }
 
-        private void RouteToInitialScene()
+        private void WireTraitAccumulator(Traits.TraitProfile profile)
+        {
+            var accumulator = new TraitAccumulator(
+                profile,
+                ServiceLocator.Get<TraitWeightsConfig>(),
+                ServiceLocator.Get<IEvolutionChecker>()
+            );
+            ServiceLocator.Register<ITraitAccumulator>(accumulator);
+
+            // Subscribe to every concrete event type (bus is keyed by concrete type)
+            BehaviorEventBus.Subscribe<DodgeUsedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CounterLandedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<PerfectBlockEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<BlockUsedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<HeavyAttackLandedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<LightAttackLandedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<AbilityUsedFullEnergyEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<AbilityUsedLowEnergyEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CombatCompletedNoDodgeEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<HitTakenNoDodgeEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DeathRecklessEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DeathSacrificeEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DeathOverwhelmedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DeathPatternFailEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DeathAmbushEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CreatureSparedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CreatureHuntedRepeatEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DialogueMercyEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DialoguePunishmentEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<NpcHelpedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<NpcIgnoredEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<LoreObjectReadEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<SecretAreaDiscoveredEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<OriginVillageReturnEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<AreaRevisitedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<QuestCompletedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<OffensiveUpgradePurchasedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<DefensiveUpgradePurchasedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<KnowledgeItemPurchasedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CurrencyHoardedEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<CurrencySpentImmediatelyEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<ExtendedDangerZoneEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<ExtendedSafeZoneEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<AllSecretsFoundEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<NightExplorationEvent>(accumulator.Process);
+            BehaviorEventBus.Subscribe<BossKilledEvent>(accumulator.Process);
+        }
+
+        // ── Scene routing ─────────────────────────────────────────────────────
+
+        private static async Task RouteToInitialSceneAsync()
         {
             ISaveManager save = ServiceLocator.Get<ISaveManager>();
 
             if (!save.Current.Character.HasAwakened)
             {
-                SceneManager.LoadScene(_awakeningScene);
+                await SceneRouter.LoadAwakeningAsync();
                 return;
             }
 
-            // Resume at last known game state
-            SceneManager.LoadScene(_gameScene);
+            await SceneRouter.LoadGameAsync();
+        }
+
+        // ── Config loader ─────────────────────────────────────────────────────
+
+        private static T LoadConfig<T>(string fileName) where T : class
+        {
+            string path = Path.Combine(Application.streamingAssetsPath, "Config", fileName);
+
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning($"[Bootstrap] Config not found at {path} — using C# defaults.");
+                return null;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(path);
+                T config = JsonUtility.FromJson<T>(json);
+                Debug.Log($"[Bootstrap] Loaded config: {fileName}");
+                return config;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Bootstrap] Failed to parse {fileName}: {ex.Message}");
+                return null;
+            }
         }
     }
 }

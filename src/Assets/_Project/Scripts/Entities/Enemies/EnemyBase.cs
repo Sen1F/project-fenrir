@@ -9,7 +9,8 @@ namespace Fenrir.Entities.Enemies
         Defensive,    // shields, blocks
         Ranged,       // projectile attacks
         Pack,         // weak alone, dangerous in numbers
-        Elite         // mini-boss tier, telegraphed heavy attacks
+        Elite,        // mini-boss tier, telegraphed heavy attacks
+        Boss          // true boss — unique per zone, triggers BossKilledEvent
     }
 
     /// <summary>

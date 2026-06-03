@@ -1,6 +1,7 @@
 using System;
 using Fenrir.Combat;
 using Fenrir.Config;
+using Fenrir.Core;
 using Fenrir.Traits;
 using UnityEngine;
 
@@ -14,23 +15,34 @@ namespace Fenrir.Entities.Player
     {
         [SerializeField] private float _maxHp = 100f;
 
-        public float MaxHp           => _maxHp;
-        public float Current         { get; private set; }
+        public float MaxHp             => _maxHp;
+        public float Current           { get; private set; }
         public float CurrentNormalized => Current / _maxHp;
-        public bool  IsDead          { get; private set; }
+        public bool  IsDead            { get; private set; }
 
-        public event Action OnDied;
-        public event Action<float> OnDamaged;   // passes normalised HP after hit
+        public event Action        OnDied;
+        public event Action<float> OnDamaged;   // normalised HP after hit
 
         private HitStateManager _hitState;
 
-        // Combat context for death classification
+        // Death classification data
         private int   _hitsTakenThisCombat;
         private float _combatStartTime;
         private bool  _inCombat;
-        private int   _consecutiveDeathsVsSameEnemy; // tracked by PlayerCombat, injected here
+        private int   _consecutiveDeathsVsSameEnemy;  // injected by PlayerCombat
+        private bool  _attackedWhileLowHp;            // set by NotifyAttackAttempt
 
         public void SetConsecutiveDeaths(int v) => _consecutiveDeathsVsSameEnemy = v;
+
+        /// <summary>
+        /// Called by PlayerCombat before each attack attempt.
+        /// Records whether the player was at low HP — needed for Sacrifice death classification.
+        /// </summary>
+        public void NotifyAttackAttempt()
+        {
+            if (CurrentNormalized < GameConfig.SacrificeHpThreshold)
+                _attackedWhileLowHp = true;
+        }
 
         private void Awake()
         {
@@ -40,24 +52,24 @@ namespace Fenrir.Entities.Player
 
         public void BeginCombat()
         {
-            _inCombat         = true;
-            _combatStartTime  = Time.time;
-            _hitsTakenThisCombat = 0;
+            _inCombat              = true;
+            _combatStartTime       = Time.time;
+            _hitsTakenThisCombat   = 0;
+            _attackedWhileLowHp    = false;
         }
 
         public void EndCombat() => _inCombat = false;
 
-        /// <summary>Returns whether the hit landed (false if dodging).</summary>
+        /// <summary>Returns whether the hit landed (false if currently invincible).</summary>
         public bool TakeHit(AttackData attack, Element defenderElement)
         {
-            if (IsDead) return false;
+            if (IsDead)               return false;
             if (_hitState.IsInvincible) return false;
 
             float damage = attack.BaseDamage;
 
             if (_hitState.IsPerfectBlockWindow)
             {
-                // Perfect block absorbs all damage
                 BehaviorEventBus.Emit(new PerfectBlockEvent());
                 return true;
             }
@@ -70,11 +82,9 @@ namespace Fenrir.Entities.Player
             else
             {
                 _hitsTakenThisCombat++;
-                // Emit once here. CombatContext.RecordHitTakenNoDodge() must NOT
-                // also call Emit — it only increments its internal counter.
                 BehaviorEventBus.Emit(new HitTakenNoDodgeEvent());
-                // Notify CombatContext for its end-of-combat accounting
-                if (Core.ServiceLocator.TryGet<Combat.CombatContext>(out Combat.CombatContext ctx))
+                // CombatContext increments its own counter — no re-emit
+                if (ServiceLocator.TryGet<CombatContext>(out CombatContext ctx))
                     ctx.NotifyHitTaken();
             }
 
@@ -100,43 +110,64 @@ namespace Fenrir.Entities.Player
         {
             if (IsDead) return;
             IsDead = true;
-
             EmitDeathEvent();
             OnDied?.Invoke();
         }
 
         private void EmitDeathEvent()
         {
-            // Ambush: died within 5s of entering combat
+            // 1. Ambush — died within 5s of combat start → no trait shift
             if (_inCombat && (Time.time - _combatStartTime) < 5f)
             {
-                // DeathAmbushEvent → no trait shift per design
                 BehaviorEventBus.Emit(new DeathAmbushEvent());
                 return;
             }
 
-            // Pattern failure: 3rd+ death vs same enemy type
+            // 2. Pattern failure — 3rd+ death vs the same enemy type
             if (_consecutiveDeathsVsSameEnemy >= 2)
             {
                 BehaviorEventBus.Emit(new DeathPatternFailEvent());
                 return;
             }
 
-            // Reckless: took 3+ unhpblocked hits with no dodge or block used
+            // 3. Sacrifice — fought at low HP (<25%) AND dealt only minor damage
+            //    (< 25% of any single enemy's max HP) OR faced a group (2+ enemies)
+            if (_attackedWhileLowHp && IsSacrificeDeath())
+            {
+                BehaviorEventBus.Emit(new DeathSacrificeEvent());
+                return;
+            }
+
+            // 4. Reckless — 3+ unblocked hits, no dodge or block
             if (_hitsTakenThisCombat >= 3)
             {
                 BehaviorEventBus.Emit(new DeathRecklessEvent());
                 return;
             }
 
-            // Overwhelmed: classified externally (set before death) — fallback
+            // 5. Overwhelmed — fallback
             BehaviorEventBus.Emit(new DeathOverwhelmedEvent());
+        }
+
+        /// <summary>
+        /// Sacrifice conditions: minor damage dealt (< SacrificeMinorDamageMax of any
+        /// enemy's max HP) OR the encounter had 2+ enemies simultaneously.
+        /// </summary>
+        private static bool IsSacrificeDeath()
+        {
+            if (!ServiceLocator.TryGet<CombatContext>(out CombatContext ctx)) return false;
+
+            bool groupFight   = ctx.PeakEnemyCount >= GameConfig.SacrificeGroupEnemyMin;
+            bool minorDamage  = ctx.MaxDamageFractionDealt < GameConfig.SacrificeMinorDamageMax;
+
+            return groupFight || minorDamage;
         }
 
         public void Revive(float hpFraction = 1f)
         {
-            IsDead  = false;
-            Current = _maxHp * Mathf.Clamp01(hpFraction);
+            IsDead             = false;
+            _attackedWhileLowHp = false;
+            Current            = _maxHp * Mathf.Clamp01(hpFraction);
         }
     }
 }

@@ -22,6 +22,37 @@ namespace Fenrir.Combat
         private bool  _playerDodgedThisFight;
         private int   _hitsWithoutDodge;
 
+        // Sacrifice death tracking
+        private int _peakEnemyCount;
+
+        // Key: EnemyBase instance, Value: total damage dealt by player to that enemy this fight
+        private readonly Dictionary<EnemyBase, float> _damageDealtPerEnemy = new();
+
+        // ── Public read-only queries (used by PlayerHealth for death classification) ──
+
+        /// <summary>Highest number of simultaneous enemies in this encounter.</summary>
+        public int PeakEnemyCount => _peakEnemyCount;
+
+        /// <summary>
+        /// Highest fraction of any single enemy's max HP that the player dealt in this fight.
+        /// Returns 0 if no damage was recorded.
+        /// </summary>
+        public float MaxDamageFractionDealt
+        {
+            get
+            {
+                float max = 0f;
+                foreach (KeyValuePair<EnemyBase, float> pair in _damageDealtPerEnemy)
+                {
+                    var health = pair.Key.GetComponent<EnemyHealth>();
+                    if (health == null) continue;
+                    float fraction = pair.Value / health.MaxHp;
+                    if (fraction > max) max = fraction;
+                }
+                return max;
+            }
+        }
+
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void Awake()
@@ -40,6 +71,10 @@ namespace Fenrir.Combat
         {
             bool wasClear = _activeEnemies.Count == 0;
             _activeEnemies.Add(enemy);
+
+            if (_activeEnemies.Count > _peakEnemyCount)
+                _peakEnemyCount = _activeEnemies.Count;
+
             if (wasClear) BeginCombat();
         }
 
@@ -49,15 +84,26 @@ namespace Fenrir.Combat
             if (_activeEnemies.Count == 0) EndCombat();
         }
 
-        // ── Player action tracking (called by PlayerCombat / PlayerTraitEmitter) ──
+        // ── Player action tracking ────────────────────────────────────────────
 
         public void RecordDodge() => _playerDodgedThisFight = true;
 
         /// <summary>
-        /// Called by PlayerHealth after it has already emitted HitTakenNoDodgeEvent.
-        /// CombatContext only updates its internal counter here — does NOT re-emit.
+        /// Called by PlayerHealth after emitting HitTakenNoDodgeEvent.
+        /// Only increments internal counter — does NOT re-emit.
         /// </summary>
         public void NotifyHitTaken() => _hitsWithoutDodge++;
+
+        /// <summary>
+        /// Called by PlayerCombat after a confirmed hit lands on an enemy.
+        /// Accumulates damage per enemy for Sacrifice death classification.
+        /// </summary>
+        public void RecordDamageDealt(EnemyBase enemy, float damage)
+        {
+            if (enemy == null) return;
+            _damageDealtPerEnemy.TryGetValue(enemy, out float prev);
+            _damageDealtPerEnemy[enemy] = prev + damage;
+        }
 
         // ── Internal ──────────────────────────────────────────────────────────
 
@@ -66,9 +112,9 @@ namespace Fenrir.Combat
             _combatStartTime       = Time.time;
             _playerDodgedThisFight = false;
             _hitsWithoutDodge      = 0;
+            _peakEnemyCount        = _activeEnemies.Count;
+            _damageDealtPerEnemy.Clear();
 
-            // Do NOT force player state here — CombatSystem and PlayerCombat own that.
-            // Only update game state and audio.
             SceneRouter.SetGameState(GameState.Combat);
 
             if (ServiceLocator.TryGet<AudioManager>(out AudioManager audio))
@@ -81,8 +127,6 @@ namespace Fenrir.Combat
         {
             float duration = Time.time - _combatStartTime;
 
-            // "Dodge never used (combat completed)" — fires whenever the player finished
-            // a fight without using a single dodge, regardless of hits taken.
             if (!_playerDodgedThisFight)
                 BehaviorEventBus.Emit(new CombatCompletedNoDodgeEvent());
 

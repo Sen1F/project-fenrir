@@ -53,13 +53,15 @@ namespace Fenrir.Entities.Player
 
         public void DoLightAttack(GameObject target)
         {
+            _health.NotifyAttackAttempt();  // records low-HP flag for Sacrifice classification
             var attack = new AttackData(AttackType.Light, _lightAttackDamage, PlayerElement);
             if (TryHitTarget(target, attack))
-                _emitter.OnLightAttackLanded();   // emit ONLY after confirmed hit
+                _emitter.OnLightAttackLanded();
         }
 
         public void DoHeavyAttack(GameObject target)
         {
+            _health.NotifyAttackAttempt();
             var attack = new AttackData(AttackType.Heavy, _heavyAttackDamage, PlayerElement);
             if (TryHitTarget(target, attack))
                 _emitter.OnHeavyAttackLanded();
@@ -68,6 +70,7 @@ namespace Fenrir.Entities.Player
         public void DoAbility(GameObject target)
         {
             if (!_energy.TrySpend(_abilityEnergyCost)) return;
+            _health.NotifyAttackAttempt();
             var attack = new AttackData(AttackType.Ability, _abilityDamage, PlayerElement, isAbility: true);
             if (TryHitTarget(target, attack))
                 _emitter.OnAbilityUsed();
@@ -113,10 +116,21 @@ namespace Fenrir.Entities.Player
         private bool TryHitTarget(GameObject target, AttackData attack)
         {
             if (target == null) return false;
+
             var enemyHealth = target.GetComponent<Entities.Enemies.EnemyHealth>();
             if (enemyHealth == null) return false;
 
+            float hpBefore = enemyHealth.Current;
             enemyHealth.TakeHit(attack, PlayerElement);
+            float damageDealt = hpBefore - enemyHealth.Current;
+
+            // Report to CombatContext for Sacrifice death classification
+            if (damageDealt > 0f && ServiceLocator.TryGet<CombatContext>(out CombatContext ctx))
+            {
+                var enemyBase = target.GetComponent<Entities.Enemies.EnemyBase>();
+                ctx.RecordDamageDealt(enemyBase, damageDealt);
+            }
+
             return true;
         }
 

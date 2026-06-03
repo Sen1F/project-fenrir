@@ -42,9 +42,15 @@ namespace Fenrir.Config
         public const float XpMultiplierLoreRead      = 0.5f;
         public const float XpMultiplierRareCreature  = 1.5f;
 
-        // ── Death Currency Loss ───────────────────────────────────────────────
-        public const float DeathCurrencyLossMin  = 0.15f;
-        public const float DeathCurrencyLossMax  = 0.25f;
+        // ── Death classification ──────────────────────────────────────────────
+        public const float DeathCurrencyLossMin      = 0.15f;
+        public const float DeathCurrencyLossMax      = 0.25f;
+        /// <summary>HP fraction below which the player is considered "fighting at low HP" (Sacrifice death).</summary>
+        public const float SacrificeHpThreshold     = 0.25f;
+        /// <summary>Max fraction of an enemy's HP the player may have dealt and still qualify as "minor damage".</summary>
+        public const float SacrificeMinorDamageMax   = 0.25f;
+        /// <summary>Minimum enemy count in the encounter to qualify as a group fight for Sacrifice detection.</summary>
+        public const int   SacrificeGroupEnemyMin    = 2;
 
         // ── Elemental Resistance ─────────────────────────────────────────────
         public const float ElementalResistanceMod  = -0.25f; // same element

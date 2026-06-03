@@ -10,8 +10,6 @@ namespace Fenrir.Combat
     /// </summary>
     public class CombatSystem : MonoBehaviour
     {
-        private const string BossEnemyId = "emberlord";   // must match EnemyBase._enemyId
-
         // Lazy: player may not be in the scene when CombatSystem.Awake fires
         private PlayerCombat PlayerCombat =>
             _playerCombat != null ? _playerCombat
@@ -19,16 +17,15 @@ namespace Fenrir.Combat
 
         private PlayerCombat _playerCombat;
 
-        // Key: enemyId, Value: consecutive kill count this session
+        // Key: enemyId (content identity), Value: consecutive kill count this session
         private readonly System.Collections.Generic.Dictionary<string, int> _killCounts = new();
 
         public void RegisterEnemy(EnemyBase enemy)
         {
-            string id      = enemy.EnemyId;
-            var health     = enemy.GetComponent<EnemyHealth>();
-            var emitter    = enemy.GetComponent<EnemyTraitEmitter>();
+            var health  = enemy.GetComponent<EnemyHealth>();
+            var emitter = enemy.GetComponent<EnemyTraitEmitter>();
 
-            PlayerCombat?.EnterCombat(id);
+            PlayerCombat?.EnterCombat(enemy.EnemyId);
 
             if (health != null)
                 health.OnDied += () => HandleEnemyDeath(enemy, emitter);
@@ -41,8 +38,8 @@ namespace Fenrir.Combat
             _killCounts.TryGetValue(id, out int count);
             _killCounts[id] = count + 1;
 
-            // Boss = specific enemy ID, not archetype (Elite = miniboss tier)
-            bool isBoss = id == BossEnemyId;
+            // Boss detection via archetype — EnemyId is content identity only
+            bool isBoss = enemy.Archetype == EnemyArchetype.Boss;
             emitter?.OnKilledByPlayer(isBoss, id);
 
             if (_killCounts[id] >= 3)

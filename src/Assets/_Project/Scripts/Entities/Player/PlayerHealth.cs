@@ -157,8 +157,10 @@ namespace Fenrir.Entities.Player
         {
             if (!ServiceLocator.TryGet<CombatContext>(out CombatContext ctx)) return false;
 
-            bool groupFight   = ctx.PeakEnemyCount >= GameConfig.SacrificeGroupEnemyMin;
-            bool minorDamage  = ctx.MaxDamageFractionDealt < GameConfig.SacrificeMinorDamageMax;
+            // Group fight = enemies that are aggroed or alerted at the moment of death
+            // (live query via EnemyAI.IsAwareOfPlayer — not a stale snapshot)
+            bool groupFight  = ctx.GetAwareEnemyCount() >= GameConfig.SacrificeGroupEnemyMin;
+            bool minorDamage = ctx.MaxDamageFractionDealt < GameConfig.SacrificeMinorDamageMax;
 
             return groupFight || minorDamage;
         }

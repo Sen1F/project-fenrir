@@ -19,21 +19,35 @@ namespace Fenrir.Entities.Enemies
         [SerializeField] private float _staggerDuration = 0.5f;
 
         // ── Components ────────────────────────────────────────────────────────
-        private EnemyBase   _base;
-        private EnemyHealth _health;
+        private EnemyBase    _base;
+        private EnemyHealth  _health;
+        private EnemyCombat  _combat;   // cached — A3 fix: was GetComponent every attack
         private NavMeshAgent _agent;
 
         // ── State ─────────────────────────────────────────────────────────────
         private AIState   _state        = AIState.Idle;
         private Transform _target;
-        private Transform _cachedPlayer;   // cached once; never call FindWithTag in Update
+        private Transform _cachedPlayer;
         private float     _attackCooldown;
         private float     _staggerTimer;
+
+        // ── Public awareness query (used by CombatContext for Sacrifice classification) ──
+
+        /// <summary>
+        /// True when this enemy is aware of the player — aggroed (Chase/Attack) or
+        /// alerted but unable to reach (Stagger). False when Idle or Dead.
+        /// CombatContext reads this; state enum stays private.
+        /// </summary>
+        public bool IsAwareOfPlayer =>
+            _state is AIState.Chase or AIState.Attack or AIState.Stagger;
+
+        // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void Awake()
         {
             _base   = GetComponent<EnemyBase>();
             _health = GetComponent<EnemyHealth>();
+            _combat = GetComponent<EnemyCombat>();   // cached once
             _agent  = GetComponent<NavMeshAgent>();
 
             _health.OnDied += HandleDeath;
@@ -41,7 +55,7 @@ namespace Fenrir.Entities.Enemies
 
         private void Start()
         {
-            // Cache player once at scene start — FindWithTag must NOT run in Update
+            // Cache player once — FindWithTag must never run in Update
             GameObject player = GameObject.FindWithTag("Player");
             if (player != null) _cachedPlayer = player.transform;
         }
@@ -74,17 +88,8 @@ namespace Fenrir.Entities.Enemies
 
             float dist = Vector3.Distance(transform.position, _target.position);
 
-            if (dist > _detectionRange * 1.5f)
-            {
-                TransitionTo(AIState.Idle);
-                return;
-            }
-
-            if (dist <= _attackRange)
-            {
-                TransitionTo(AIState.Attack);
-                return;
-            }
+            if (dist > _detectionRange * 1.5f) { TransitionTo(AIState.Idle);  return; }
+            if (dist <= _attackRange)           { TransitionTo(AIState.Attack); return; }
 
             _agent.SetDestination(_target.position);
         }
@@ -94,19 +99,14 @@ namespace Fenrir.Entities.Enemies
             if (_target == null) { TransitionTo(AIState.Idle); return; }
 
             float dist = Vector3.Distance(transform.position, _target.position);
-
-            if (dist > _attackRange)
-            {
-                TransitionTo(AIState.Chase);
-                return;
-            }
+            if (dist > _attackRange) { TransitionTo(AIState.Chase); return; }
 
             _agent.ResetPath();
             _attackCooldown -= Time.deltaTime;
             if (_attackCooldown <= 0f)
             {
                 _attackCooldown = _attackInterval;
-                PerformAttack();
+                _combat?.Attack(_target.gameObject);   // uses cached reference
             }
         }
 
@@ -117,15 +117,7 @@ namespace Fenrir.Entities.Enemies
                 TransitionTo(_target != null ? AIState.Chase : AIState.Idle);
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
-
-        private void PerformAttack()
-        {
-            // Delegate to EnemyCombat on the same GameObject
-            GetComponent<EnemyCombat>()?.Attack(_target.gameObject);
-        }
-
-        // FindWithTag removed — player is cached in Start() via _cachedPlayer.
+        // ── Transitions ───────────────────────────────────────────────────────
 
         private void TransitionTo(AIState next)
         {

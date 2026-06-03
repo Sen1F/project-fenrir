@@ -22,20 +22,29 @@ namespace Fenrir.Combat
         private bool  _playerDodgedThisFight;
         private int   _hitsWithoutDodge;
 
-        // Sacrifice death tracking
-        private int _peakEnemyCount;
-
         // Key: EnemyBase instance, Value: total damage dealt by player to that enemy this fight
         private readonly Dictionary<EnemyBase, float> _damageDealtPerEnemy = new();
 
-        // ── Public read-only queries (used by PlayerHealth for death classification) ──
-
-        /// <summary>Highest number of simultaneous enemies in this encounter.</summary>
-        public int PeakEnemyCount => _peakEnemyCount;
+        // ── Public queries (used by PlayerHealth for death classification) ─────
 
         /// <summary>
-        /// Highest fraction of any single enemy's max HP that the player dealt in this fight.
-        /// Returns 0 if no damage was recorded.
+        /// Count of enemies currently aggroed or alerted — queried live at death time
+        /// so enemies that join mid-fight are included. Uses EnemyAI.IsAwareOfPlayer.
+        /// </summary>
+        public int GetAwareEnemyCount()
+        {
+            int count = 0;
+            foreach (Entities.Enemies.EnemyAI ai in
+                     FindObjectsByType<Entities.Enemies.EnemyAI>(FindObjectsSortMode.None))
+            {
+                if (ai.IsAwareOfPlayer) count++;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Highest fraction of any single enemy's max HP dealt by the player this fight.
+        /// Returns 0 if no damage recorded.
         /// </summary>
         public float MaxDamageFractionDealt
         {
@@ -110,31 +119,12 @@ namespace Fenrir.Combat
             _hitsWithoutDodge      = 0;
             _damageDealtPerEnemy.Clear();
 
-            // Group = all living enemies present in the zone, not just aggroed ones.
-            // A player fighting one wolf while two more patrol nearby is still a group fight.
-            _peakEnemyCount = CountLivingEnemiesInZone();
-
             SceneRouter.SetGameState(GameState.Combat);
 
             if (ServiceLocator.TryGet<AudioManager>(out AudioManager audio))
                 audio.StartCombatMusic();
 
-            Debug.Log($"[CombatContext] Combat started. Zone enemies: {_peakEnemyCount}");
-        }
-
-        /// <summary>
-        /// Counts all EnemyHealth components in the scene that are alive.
-        /// Intentionally includes non-aggroed enemies — the zone defines the threat context.
-        /// </summary>
-        private static int CountLivingEnemiesInZone()
-        {
-            int count = 0;
-            foreach (Entities.Enemies.EnemyHealth h in
-                     FindObjectsByType<Entities.Enemies.EnemyHealth>(FindObjectsSortMode.None))
-            {
-                if (!h.IsDead) count++;
-            }
-            return count;
+            Debug.Log("[CombatContext] Combat started.");
         }
 
         private void EndCombat()

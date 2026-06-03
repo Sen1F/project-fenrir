@@ -3,6 +3,7 @@
     "rootNamespace": "Fenrir.Editor",
     "references": [
         "Fenrir.Runtime",
+        "Unity.AI.Navigation",
         "Unity.Cinemachine",
         "Unity.InputSystem"
     ],

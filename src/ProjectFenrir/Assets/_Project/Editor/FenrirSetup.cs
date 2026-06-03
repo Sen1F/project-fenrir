@@ -46,14 +46,10 @@ namespace Fenrir.Editor
         [MenuItem("Fenrir/Setup Project")]
         public static void SetupProject()
         {
-            // ── 1. Tags & Layers ─────────────────────────────────────────────
+            // ── 1. Tags ───────────────────────────────────────────────────────
             FenrirEditorUtils.EnsureTag("Player");
             FenrirEditorUtils.EnsureTag("Enemy");
             FenrirEditorUtils.EnsureTag("GameController");
-            FenrirEditorUtils.EnsureLayer("Player");
-            FenrirEditorUtils.EnsureLayer("Enemy");
-            // Player and Enemy layers do not collide — NavMeshAgent must not push CharacterController
-            FenrirEditorUtils.SetLayerCollision("Player", "Enemy", ignore: true);
 
             // ── 2. Bootstrap ──────────────────────────────────────────────────
             SetupBootstrap();
@@ -166,8 +162,6 @@ namespace Fenrir.Editor
         {
             GameObject p = GetOrCreate("Player");
             p.tag = "Player";
-            int playerLayer = LayerMask.NameToLayer("Player");
-            if (playerLayer >= 0) p.layer = playerLayer;
             EnsureComponent<CharacterController>(p);
             EnsureComponent<PlayerController>(p);
             EnsureComponent<PlayerHealth>(p);
@@ -365,9 +359,10 @@ namespace Fenrir.Editor
             go.tag  = "Enemy";
             go.transform.position = new Vector3(0f, 0.1f, 14f);  // 14 units away — outside 8f detection range
 
-            // Enemy layer — prevents CapsuleCollider from physically pushing player's CharacterController
-            int enemyLayer = LayerMask.NameToLayer("Enemy");
-            if (enemyLayer >= 0) go.layer = enemyLayer;
+            // Make the primitive collider a trigger so the NavMeshAgent never physically pushes
+            // the player's CharacterController. Hit detection uses trigger overlap, not solid collision.
+            CapsuleCollider col = go.GetComponent<CapsuleCollider>();
+            if (col != null) col.isTrigger = true;
 
             Shader urpLit = Shader.Find("Universal Render Pipeline/Lit");
             if (urpLit != null)

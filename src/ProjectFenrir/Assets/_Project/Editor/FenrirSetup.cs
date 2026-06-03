@@ -3,6 +3,7 @@ using System.IO;
 using Unity.AI.Navigation;
 using Unity.Cinemachine;
 using UnityEditor;
+using UnityEngine.AI;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem.UI;
@@ -354,7 +355,7 @@ namespace Fenrir.Editor
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             go.name = "AshWolf";
             go.tag  = "Enemy";
-            go.transform.position = new Vector3(5f, 0.1f, 5f);
+            go.transform.position = new Vector3(0f, 0.1f, 14f);  // 14 units away — outside 8f detection range
 
             Shader urpLit = Shader.Find("Universal Render Pipeline/Lit");
             if (urpLit != null)
@@ -368,6 +369,11 @@ namespace Fenrir.Editor
             agent.stoppingDistance = 1.4f;
             agent.radius           = 0.4f;
             agent.height           = 2f;
+            agent.avoidancePriority = 50;
+            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+            // Prevent the NavMeshAgent from physically pushing the player's CharacterController
+            agent.updatePosition   = true;
+            agent.updateRotation   = true;
 
             Fenrir.Entities.Enemies.EnemyHealth  health  = go.AddComponent<Fenrir.Entities.Enemies.EnemyHealth>();
             Fenrir.Entities.Enemies.EnemyCombat  combat  = go.AddComponent<Fenrir.Entities.Enemies.EnemyCombat>();

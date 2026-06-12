@@ -429,7 +429,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45ba041f54cef4e708961f90b03e29ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Fenrir.Runtime::Fenrir.Awakening.AwakeningSequencer
-  _gameScene: EmberForest
   _characterCreationPanel: {fileID: 0}
   _elementRevealPanel: {fileID: 0}
   _loadingPanel: {fileID: 0}

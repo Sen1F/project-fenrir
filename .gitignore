@@ -60,3 +60,8 @@ DerivedData/
 *.local.json
 .env
 Unity_v6000.4.9f1.alf
+
+# Unity crash artifacts
+mono_crash.*.json
+**/Assets/_Recovery/
+**/Assets/_Recovery.meta

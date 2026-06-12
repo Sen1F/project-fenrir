@@ -127,7 +127,7 @@ All constants live in `GameConfig.cs`. Never hardcode floats or strings inline.
 
 - 10 traits, all start at **50.0** (neutral), range 0–100.
 - **Hidden** — never shown as numbers to the player. Vague journal entries only.
-- Frequency dampening: after 5 identical events per session, delta halves each additional time (`Mathf.Pow(0.5f, steps+1)`).
+- Frequency dampening: first 5 identical events per session at full strength, then the delta halves per additional block of 5 (events 6–10 ×0.5, 11–15 ×0.25, …) — `steps = (count−5)/5`, factor `0.5^(steps+1)`.
 - On evolution: **30% carryover toward neutral** (`TraitProfile.ApplyEvolutionCarryover()`). Session event counts reset.
 - Trait decay is defined but **disabled in MVP** (`TraitDecayRatePerDay = 0.02f`).
 

@@ -49,6 +49,10 @@ namespace Fenrir.Core
                 SubscribeAccumulatorToBus(acc);
                 Debug.Log("[Bootstrap] TraitAccumulator re-subscribed after scene transition.");
             }
+
+            // EventLogger's handlers are wiped by the same bus clear
+            if (ServiceLocator.TryGet<Analytics.EventLogger>(out Analytics.EventLogger logger))
+                logger.Resubscribe();
         }
 
         // ── Service registration ──────────────────────────────────────────────

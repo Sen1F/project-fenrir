@@ -85,6 +85,13 @@ namespace Fenrir.Core
             }
 
             SetAppState(AppState.Loading);
+
+            // Clear the bus BEFORE the new scene activates. New-scene objects
+            // subscribe in Awake/OnEnable during activation; clearing after
+            // completion (the old GameLoop hook) wiped those fresh subscriptions.
+            // Old-scene handlers are about to be destroyed with their scene anyway.
+            // Additive sub-zone loads (RegionLoader) never pass through here.
+            Traits.BehaviorEventBus.Clear();
             OnSceneLoadStarted?.Invoke();
 
             AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);

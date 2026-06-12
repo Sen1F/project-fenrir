@@ -19,10 +19,15 @@ namespace Fenrir.Analytics
         public EventLogger(bool verbose = false)
         {
             _verbose = verbose;
-            SubscribeAll();
+            Resubscribe();
         }
 
-        private void SubscribeAll()
+        /// <summary>
+        /// (Re)attaches all log handlers. Called from the constructor and again by
+        /// Bootstrap after every full scene transition, because SceneRouter clears
+        /// the BehaviorEventBus on each transition.
+        /// </summary>
+        public void Resubscribe()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             BehaviorEventBus.Subscribe<DodgeUsedEvent>(e             => Log(e));

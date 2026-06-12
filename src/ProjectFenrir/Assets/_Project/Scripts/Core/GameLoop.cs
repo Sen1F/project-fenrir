@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Fenrir.Save;
-using Fenrir.Traits;
 using UnityEngine;
 
 namespace Fenrir.Core
@@ -10,42 +9,15 @@ namespace Fenrir.Core
     /// Drives the top-level game loop:
     ///   - Pause / resume (Time.timeScale + SceneRouter state)
     ///   - Application focus / pause → debounced auto-save on background
-    ///   - Full-scene transitions → clears BehaviorEventBus stale handlers
     ///
-    /// Additive sub-zone loads (RegionLoader) do NOT clear the bus — only
-    /// full SceneRouter transitions do, preventing trait subscriptions from
-    /// being wiped mid-gameplay.
+    /// Bus clearing on scene transitions lives in SceneRouter.TransitionAsync
+    /// (before activation) so new-scene Awake/OnEnable subscriptions survive.
     /// </summary>
     public class GameLoop : MonoBehaviour
     {
         public bool IsPaused { get; private set; }
 
         private bool _savePending;
-
-        // ── Lifecycle ─────────────────────────────────────────────────────────
-
-        private void OnEnable()
-        {
-            // Subscribe to full-scene completions only — NOT SceneManager.sceneUnloaded,
-            // which also fires for additive sub-zone unloads from RegionLoader.
-            SceneRouter.OnSceneLoadComplete += OnFullSceneTransitionComplete;
-        }
-
-        private void OnDisable()
-        {
-            SceneRouter.OnSceneLoadComplete -= OnFullSceneTransitionComplete;
-        }
-
-        /// <summary>
-        /// Called after every full SceneRouter navigation.
-        /// Clears stale scene-object handlers from the destroyed scene.
-        /// Bootstrap (DontDestroyOnLoad) re-subscribes the TraitAccumulator immediately after.
-        /// </summary>
-        private static void OnFullSceneTransitionComplete()
-        {
-            BehaviorEventBus.Clear();
-            Debug.Log("[GameLoop] BehaviorEventBus cleared after full scene transition.");
-        }
 
         // ── Pause / Resume ────────────────────────────────────────────────────
 

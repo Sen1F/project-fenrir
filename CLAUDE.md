@@ -45,9 +45,10 @@ Read the relevant doc before changing anything in its domain.
 
 ```text
 src/
-  Assets/
-    _Project/
-      Scripts/          ← all C# source, namespaced Fenrir.*
+  ProjectFenrir/        ← the Unity project (open this in Unity Hub)
+    Assets/
+      _Project/
+        Scripts/        ← all C# source, namespaced Fenrir.*
         Analytics/      ← EventLogger
         Audio/          ← AudioManager, MusicLayer, SFXPool
         Awakening/      ← AwakeningSequencer, ElementDistribution, ElementSeedService
@@ -67,12 +68,13 @@ src/
                            TraitAccumulator, TraitKey, TraitProfile
         UI/             ← EnergyBar, HUD, JournalController
         World/          ← DayNightCycle, DayPhase, RegionLoader, WorldManager
-    Plugins/
-      iOS/              ← KeychainPlugin.swift, iCloudPlugin.swift
-    StreamingAssets/
-      Config/           ← TraitWeights.json, EvolutionSignatures.json, EnemyDefinitions.json
-  Tests/
-    EditMode/           ← TraitAccumulatorTests, TraitProfileTests,
+      Editor/           ← FenrirSetup (Fenrir → Setup Project), FenrirEditorUtils
+      Plugins/
+        iOS/            ← KeychainPlugin.swift, iCloudPlugin.swift
+      StreamingAssets/
+        Config/         ← TraitWeights.json, EvolutionSignatures.json, EnemyDefinitions.json
+    Tests/
+      EditMode/         ← TraitAccumulatorTests, TraitProfileTests,
                            ElementDistributionTests, EvolutionCheckerTests, SaveManagerTests
 ```text
 ---
@@ -195,9 +197,10 @@ test(save): add round-trip SaveManager tests
 
 ## Running tests
 
-Unity EditMode tests live in `src/Tests/EditMode/`.
+Unity EditMode tests live in `src/ProjectFenrir/Tests/EditMode/`.
 Run via Unity Test Runner (Window → General → Test Runner → EditMode).
-No PlayMode tests yet — those come in Phase 2.
+No PlayMode tests yet — those come in Phase 3.
+CI does NOT run Unity tests (Personal license can't activate headless) — run them locally before every merge.
 
 Key test files:
 
@@ -211,16 +214,13 @@ Key test files:
 
 ## Current phase
 
-**Phase 1 — Repo / Foundation** (in progress)
-All C# scaffold is written. Next steps:
+**Phase 2 — Architecture** merged to `main` (PR #3, #4). **Phase 3 — MVP Gameplay** starting.
 
-- Unity project setup: create scenes (Bootstrap, Awakening, EmberForest), wire GameObjects to scripts
-- Set player tag to `"Player"` (required by `EnemyAI.FindPlayer()` and trigger volumes)
-- Configure NavMesh in EmberForest scene
-- Set up Cinemachine FreeLook for third-person camera
-- Assign `DayNightCycle` directional light + gradient/curve in Inspector
-- Wire `InputHandler → GestureRecognizer → TouchMapper → PlayerController/PlayerCombat` in scene
-- Load JSON configs from StreamingAssets at runtime (currently using C# defaults — Phase 2)
-- Write native Xcode build post-process script to embed Swift plugins
+Done: scenes + GameObjects wired via `Fenrir → Setup Project` (single idempotent editor
+command), state machines, combat context, death classification, SceneRouter/GameLoop,
+trait pipeline, first enemy (Ash Wolf), NavMesh bake, tags, URP auto-repair.
 
-See `ROADMAP.md` for full phase breakdown.
+Open Phase 2 verification items (see `PLAN.md` P2-02…P2-07): run all EditMode tests
+locally, TraitDebugHUD smoke test, save/load round-trip, iOS device build.
+
+`PLAN.md` is the ticket-level source of truth; `ROADMAP.md` has the phase overview.

@@ -1,0 +1,21 @@
+{
+    "name": "Fenrir.Editor",
+    "rootNamespace": "Fenrir.Editor",
+    "references": [
+        "Fenrir.Runtime",
+        "Unity.AI.Navigation",
+        "Unity.Cinemachine",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

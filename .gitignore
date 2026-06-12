@@ -1,13 +1,13 @@
 # ───────────────────────────────────────
-# Unity generated
+# Unity generated (any depth — covers src/ProjectFenrir/ and repo root)
 # ───────────────────────────────────────
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/[Ll]ogs/
-/[Uu]ser[Ss]ettings/
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
 
 # Unity cache and packaging
 *.pidb.meta
@@ -59,3 +59,9 @@ DerivedData/
 # ───────────────────────────────────────
 *.local.json
 .env
+Unity_v6000.4.9f1.alf
+
+# Unity crash artifacts
+mono_crash.*.json
+**/Assets/_Recovery/
+**/Assets/_Recovery.meta

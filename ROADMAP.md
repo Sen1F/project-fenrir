@@ -11,37 +11,54 @@
 - [x] World Design — Ember Forest (sub-zones, shrines, NPCs)
 - [x] All design questions closed
 
-## Phase 1 — Repo / Foundation 🔄 IN PROGRESS
+## Phase 1 — Repo / Foundation ✅ COMPLETE
 
-**Engine:** Unity 2022 LTS | **Language:** C# | **Pipeline:** URP
+**Engine:** Unity 6 LTS | **Language:** C# | **Pipeline:** URP
 
-- [ ] Unity project created, URP configured
-- [ ] New Input System installed
+- [x] Unity 6 LTS project created, URP (Mobile renderer) configured
+- [x] New Input System installed and set as active input handler
 - [x] `_Project/` folder structure scaffolded
 - [x] Bootstrap scene + ServiceLocator skeleton
 - [x] `TraitProfile.cs` + `BehaviorEvent.cs` data models
-- [x] `BehaviorEventBus.cs`
+- [x] `BehaviorEventBus.cs` (with Unsubscribe support)
 - [x] `KeychainBridge.cs` + `KeychainPlugin.swift` stub
 - [x] `iCloudPlugin.swift` stub
-- [x] `TraitWeights.json` + `EvolutionSignatures.json` + `EnemyDefinitions.json` config placeholders
-- [x] `AudioManager.cs` + `MusicLayer.cs` + `SFXPool.cs` stubs
-- [x] EditMode unit tests (TraitAccumulator, EvolutionChecker, ElementDistribution, TraitProfile)
-- [ ] iOS build target configured (bundle ID, signing)
-- [ ] CI: build validation on push to `develop`
+- [x] `TraitWeights.json` + `EvolutionSignatures.json` + `EnemyDefinitions.json`
+- [x] `AudioManager.cs` + `MusicLayer.cs` + `SFXPool.cs`
+- [x] EditMode unit tests — 27 tests, 5 suites, all passing
+- [x] iOS bundle ID set: `com.fenrir.projectfenrir`
+- [x] CI: GitHub Actions — lint-docs + unity-build + editmode tests
+- [x] First playable: player movement, Cinemachine camera, EmberForest scene wired
 
-## Phase 2 — Architecture
+## Phase 2 — Architecture 🔄 IN PROGRESS
 
-- [ ] GameLoop, StateMachine, SceneRouter
-- [ ] PlayerController (movement, camera)
-- [ ] InputHandler (joystick + swipe mapping)
-- [ ] EnemyBase + EnemyAI state machine
-- [ ] CombatSystem (attack resolver, hit states, energy)
-- [ ] TraitAccumulator + EvolutionChecker
-- [ ] ShrineController
-- [ ] DayNightCycle
-- [ ] SaveManager (JSON + Keychain layers)
-- [ ] AudioManager skeleton
-- [ ] HUD skeleton (energy bar, health)
+- [x] `SceneRouter` — async typed scene loading, App/GameState events
+- [x] `AppStateMachine` — PlayerState transitions, valid-transition table
+- [x] `GameLoop` — pause/resume, auto-save on app background/quit
+- [x] `Bootstrap` — StreamingAssets JSON config loading, SceneRouter routing
+- [x] `CombatContext` — active encounter tracking, trait events on combat end
+- [x] `ServiceLocator.Unregister<T>()` added
+- [x] PlayerController (movement, Cinemachine camera) — first playable ✅
+- [x] InputHandler + GestureRecognizer + TouchMapper wired
+- [x] EnemyBase + EnemyAI (NavMesh) — code complete, editor spawn script done
+- [x] CombatSystem + AttackResolver + HitStateManager — code complete
+- [x] TraitAccumulator + EvolutionChecker — code complete + unit tested
+- [x] ShrineController — code complete
+- [x] DayNightCycle — in EmberForest scene
+- [x] SaveManager (JSON) — code complete + unit tested
+- [x] AudioManager + MusicLayer + SFXPool — wired to DayNightCycle
+- [x] HUD — EnergyBar + health bar code complete
+- [x] `FenrirBootstrapSetup` editor script — one-click Bootstrap scene wiring
+- [x] `EventLogger` — trait delta output (event key + Δ per trait + current value)
+- [x] `BehaviorEventBus.Clear()` scoped to full-scene transitions; Bootstrap re-subscribes accumulator after each
+- [x] `InputHandler` — touch guard fixed; touch input now works on device
+- [x] `AwakeningSequencer` — routes through `SceneRouter` instead of `SceneManager`
+- [x] `JournalController` — evolution entry keys corrected to match `EvolutionChecker` IDs
+- [ ] NavMesh baked in EmberForest (Unity Editor)
+- [ ] First enemy alive in Play mode (Ash Wolf patrol + chase)
+- [ ] Trait events firing live — confirm "dodge → Patience +2.0" in Console
+- [ ] Save/Load round-trip verified in Play mode
+- [ ] Bootstrap scene wired via Fenrir → Setup → Setup Bootstrap Scene
 
 ## Phase 3 — MVP Gameplay
 

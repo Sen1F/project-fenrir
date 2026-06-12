@@ -65,3 +65,4 @@ Unity_v6000.4.9f1.alf
 mono_crash.*.json
 **/Assets/_Recovery/
 **/Assets/_Recovery.meta
+**/ShaderGraphSettings 2.asset

@@ -212,3 +212,12 @@ architecture honest enough that a bug in trait maths is caught by a test instead
 of a player.
 
 Everything here is subject to change. That is the point of building in public.
+
+---
+
+## Licence
+
+Source-available, not open-source. © 2026 Sen1F — all rights reserved.
+You're welcome to read the code and build it locally to evaluate it; reuse,
+redistribution, and derivative works require written permission. See
+[LICENSE](LICENSE).

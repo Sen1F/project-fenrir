@@ -114,7 +114,7 @@ Created the actual Unity project and wired everything up.
 **Steps:**
 
 1. Created Unity 6 LTS (6000.4.9f1) project via Unity Hub — Universal 3D template (URP)
-   - Location: `/Users/seni/Documents/Claude/Projects/Project Fenrir/src/ProjectFenrir`
+   - Location: `src/ProjectFenrir` (repo-relative)
    - No Unity VCS — using existing Git repo
 2. Updated engine target from Unity 2022 LTS → Unity 6 LTS across all docs and code
 3. Added packages to `manifest.json`:

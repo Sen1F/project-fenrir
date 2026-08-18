@@ -29,6 +29,9 @@ namespace Fenrir.Awakening
 
         // Filled by CharacterCreationUI before calling Confirm()
         private string _pendingName;
+        private string _pendingGender      = "Male";
+        private int    _pendingFacePreset  = 0;
+        private int    _pendingBodyType    = 0;
         private int    _pendingSlotIndex;
 
         private void Start()
@@ -38,8 +41,11 @@ namespace Fenrir.Awakening
 
         // ── UI callbacks (called by CharacterCreationUI buttons) ───────────────
 
-        public void SetCharacterName(string name)   => _pendingName      = name;
-        public void SetSlotIndex(int index)         => _pendingSlotIndex = index;
+        public void SetCharacterName(string name)      => _pendingName       = name;
+        public void SetCharacterGender(string gender)  => _pendingGender     = gender;
+        public void SetCharacterFacePreset(int preset) => _pendingFacePreset = preset;
+        public void SetCharacterBodyType(int type)     => _pendingBodyType   = type;
+        public void SetSlotIndex(int index)            => _pendingSlotIndex  = index;
 
         public void ConfirmCreation()
         {
@@ -62,6 +68,9 @@ namespace Fenrir.Awakening
             {
                 var c              = save.Current.Character;
                 c.Name             = _pendingName;
+                c.Gender           = _pendingGender;
+                c.FacePreset       = _pendingFacePreset;
+                c.BodyType         = _pendingBodyType;
                 c.SlotIndex        = _pendingSlotIndex;
                 c.CurrentElement   = element;
                 c.HasAwakened      = true;

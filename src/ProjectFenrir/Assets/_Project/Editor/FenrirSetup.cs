@@ -224,6 +224,10 @@ namespace Fenrir.Editor
             EnsureComponent<HUD>(go);
             EnsureComponent<EnergyBar>(go);
             EnsureComponent<JournalController>(go);
+            // TraitDebugHUD is guarded by #if UNITY_EDITOR || DEVELOPMENT_BUILD.
+            // Safe to attach here: UNITY_EDITOR is always defined in the Editor.
+            // The component is excluded from release builds by the #if guard.
+            EnsureComponent<TraitDebugHUD>(go);
         }
 
         // ── Finalize ──────────────────────────────────────────────────────────
@@ -338,6 +342,7 @@ namespace Fenrir.Editor
             SetRef(gesture,  "_mapper",     mapper);
             SetRef(handler,  "_gesture",    gesture);
             SetRef(handler,  "_mapper",     mapper);
+            SetRef(handler,  "_journal",    journal);
             SetRef(dn,       "_directionalLight", light);
             SetRef(wm,       "_dayNight",   dn);
             SetRef(audio,    "_musicLayer", music);
